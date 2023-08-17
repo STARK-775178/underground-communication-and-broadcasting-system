@@ -64,7 +64,14 @@
                     </el-card>
                 </div>
                 <!-- 点击呼叫确认对话Dialog -->
-                <el-dialog :show-close="false" v-model="dialogVisible" title="提示" width="30%">
+                <el-dialog
+                    :close-on-click-modal="false"
+                    :close-on-press-escape="false"
+                    :show-close="false"
+                    v-model="dialogVisible"
+                    title="提示"
+                    width="30%"
+                >
                     <template #default>
                         <span>确认对 {{ selectedCard.area }}、{{ selectedCard.ip }}、{{ selectedCard.speaker }} 进行通话？</span>
                     </template>
@@ -77,7 +84,14 @@
                 </el-dialog>
 
                 <!-- 通话过程中对话框 -->
-                <el-dialog width="250px" title="    正在IP通话...." :show-close="false" v-model="callDialogVisible">
+                <el-dialog
+                    :close-on-click-modal="false"
+                    :close-on-press-escape="false"
+                    width="250px"
+                    title="    正在IP通话...."
+                    :show-close="false"
+                    v-model="callDialogVisible"
+                >
                     <div class="dialog-content">
                         <div class="centered-image">
                             <img style="width: 100%; height: 100%" src="src\assets\call.png" />
