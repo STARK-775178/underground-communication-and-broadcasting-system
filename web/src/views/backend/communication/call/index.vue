@@ -1,142 +1,144 @@
 <template>
-    <div class="common-layout">
-        <el-container>
-            <!-- header -->
-            <el-header>
-                <el-tabs v-model="selectedArea" type="card" @tab-click="handleClick">
-                    <el-tab-pane name="所有区域" :label="'所有区域'"></el-tab-pane>
-                    <el-tab-pane v-for="item in areaList" :key="item.id" :name="item.area" :label="item.area"></el-tab-pane>
-                </el-tabs>
-            </el-header>
-            <div style="display: flex; justify-content: space-between">
-                <div style="margin-left: 50px">
-                    <el-text class="mx-1" size="large">音箱数量:</el-text>
-                    <el-text style="margin-left: 3px" size="large" class="mx-1">
-                        {{ filteredDeviceList.length }}
-                    </el-text>
+    <div v-loading="!deviceIsLoaded && !areaIsLoaded">
+        <div class="common-layout">
+            <el-container >
+                <!-- header -->
+                <el-header>
+                    <el-tabs  v-model="selectedArea" type="card" @tab-click="handleClick">
+                        <el-tab-pane name="所有区域" :label="'所有区域'"></el-tab-pane>
+                        <el-tab-pane v-for="item in areaList" :key="item.id" :name="item.area" :label="item.area"></el-tab-pane>
+                    </el-tabs>
+                </el-header>
+                <div style="display: flex; justify-content: space-between">
+                    <div style="margin-left: 50px">
+                        <el-text class="mx-1" size="large">音箱数量:</el-text>
+                        <el-text style="margin-left: 3px" size="large" class="mx-1">
+                            {{ filteredDeviceList.length }}
+                        </el-text>
+                    </div>
+                    <!-- 在线设备、离线设备 -->
+                    <div style="margin-right: 80px">
+                        <!-- <el-text class="mx-1" size="large">在线</el-text> -->
+                        <el-tag type="success" class="mx-1" effect="dark" round> 在线 </el-tag>
+                        <el-text size="large" class="mx-1">{{ onlineNumber }}</el-text>
+                        <!-- <el-text style="margin-left: 10px" class="mx-1" size="large">离线</el-text> -->
+                        <el-tag style="margin-left: 10px" type="warning" class="mx-1" effect="dark" round> 离线 </el-tag>
+                        <el-text size="large" class="mx-1">{{ offlineNumber }}</el-text>
+                    </div>
                 </div>
-                <!-- 在线设备、离线设备 -->
-                <div style="margin-right: 80px">
-                    <!-- <el-text class="mx-1" size="large">在线</el-text> -->
-                    <el-tag type="success" class="mx-1" effect="dark" round> 在线 </el-tag>
-                    <el-text size="large" class="mx-1">{{ onlineNumber }}</el-text>
-                    <!-- <el-text style="margin-left: 10px" class="mx-1" size="large">离线</el-text> -->
-                    <el-tag style="margin-left: 10px" type="warning" class="mx-1" effect="dark" round> 离线 </el-tag>
-                    <el-text size="large" class="mx-1">{{ offlineNumber }}</el-text>
-                </div>
-            </div>
 
-            <!-- main -->
-            <el-main>
-                <div class="card-grid-container">
-                    <el-card class="box-card" v-for="card in getCurrentPageDevices" :key="card.id" body-style="padding: 0;">
-                        <template #header>
-                            <div>
-                                <el-tag
-                                    size="small"
-                                    style="margin-left: 120px; margin-top: 0"
-                                    :type="getTagType(card.status)"
-                                    class="mx-1"
-                                    effect="dark"
-                                    round
-                                >
-                                    {{ getStatusText(card.status) }}
-                                </el-tag>
-                            </div>
-                            <div class="centered-image">
-                                <img style="width: 50%; height: 50%; margin-top: 0px" src="src\assets\horn.png" />
+                <!-- main -->
+                <el-main>
+                    <div class="card-grid-container">
+                        <el-card class="box-card" v-for="card in getCurrentPageDevices" :key="card.id" body-style="padding: 0;">
+                            <template #header>
+                                <div>
+                                    <el-tag
+                                        size="small"
+                                        style="margin-left: 120px; margin-top: 0"
+                                        :type="getTagType(card.status)"
+                                        class="mx-1"
+                                        effect="dark"
+                                        round
+                                    >
+                                        {{ getStatusText(card.status) }}
+                                    </el-tag>
+                                </div>
+                                <div class="centered-image">
+                                    <img style="width: 50%; height: 50%; margin-top: 0px" src="src\assets\horn.png" />
+                                </div>
+
+                                <div>
+                                    <span class="centered-text">{{ card.work_area }}</span>
+                                </div>
+                            </template>
+
+                            <div class="info-container">
+                                <div class="ip-address">
+                                    <span class="centered-text">{{ card.adress_ip }}</span>
+                                </div>
+
+                                <div class="speakers">
+                                    <span class="centered-text">{{ card.device_name }}</span>
+                                </div>
                             </div>
 
-                            <div>
-                                <span class="centered-text">{{ card.work_area }}</span>
+                            <div class="centered-button">
+                                <el-button :disabled="card.status === 0" @click="openDialog(card)" size="small">独立呼叫</el-button>
+                            </div>
+                        </el-card>
+                    </div>
+                    <!-- 点击呼叫确认对话Dialog -->
+                    <el-dialog
+                        :close-on-click-modal="false"
+                        :close-on-press-escape="false"
+                        :show-close="false"
+                        v-model="dialogVisible"
+                        title="提示"
+                        width="30%"
+                    >
+                        <template #default>
+                            <span>确认对 {{ selectedCard.work_area }}、{{ selectedCard.adress_ip }}、{{ selectedCard.device_name }} 进行通话？</span>
+                        </template>
+                        <template #footer>
+                            <div class="dialog-footer">
+                                <el-button type="warning" @click="cancelCall">取消</el-button>
+                                <el-button type="primary" @click="confirmCall">确认</el-button>
                             </div>
                         </template>
+                    </el-dialog>
 
-                        <div class="info-container">
-                            <div class="ip-address">
-                                <span class="centered-text">{{ card.adress_ip }}</span>
+                    <!-- 通话过程中对话框 -->
+                    <el-dialog
+                        :close-on-click-modal="false"
+                        :close-on-press-escape="false"
+                        width="250px"
+                        title="    正在IP通话...."
+                        :show-close="false"
+                        v-model="callDialogVisible"
+                    >
+                        <div class="dialog-content">
+                            <div class="centered-image">
+                                <img style="width: 100%; height: 100%" src="src\assets\call.png" />
+                            </div>
+                            <div class="dialog-row">
+                                <el-col>
+                                    <el-text class="mx-1" size="default">{{ formatDuration }}</el-text>
+                                </el-col>
+                            </div>
+                            <el-divider />
+                            <div class="dialog-row">
+                                <el-text class="mx-1" size="small">{{ selectedCard.work_area }}</el-text>
+                            </div>
+                            <div class="dialog-row">
+                                <el-text class="mx-1" size="small">{{ selectedCard.adress_ip }}</el-text>
                             </div>
 
-                            <div class="speakers">
-                                <span class="centered-text">{{ card.device_name }}</span>
+                            <div class="dialog-row">
+                                <el-text class="mx-1" size="small">{{ selectedCard.device_name }}</el-text>
                             </div>
                         </div>
-
-                        <div class="centered-button">
-                            <el-button :disabled="card.status === 0" @click="openDialog(card)" size="small">独立呼叫</el-button>
-                        </div>
-                    </el-card>
-                </div>
-                <!-- 点击呼叫确认对话Dialog -->
-                <el-dialog
-                    :close-on-click-modal="false"
-                    :close-on-press-escape="false"
-                    :show-close="false"
-                    v-model="dialogVisible"
-                    title="提示"
-                    width="30%"
-                >
-                    <template #default>
-                        <span>确认对 {{ selectedCard.work_area }}、{{ selectedCard.adress_ip }}、{{ selectedCard.device_name }} 进行通话？</span>
-                    </template>
-                    <template #footer>
                         <div class="dialog-footer">
-                            <el-button type="warning" @click="cancelCall">取消</el-button>
-                            <el-button type="primary" @click="confirmCall">确认</el-button>
+                            <el-button round type="danger" size="large" @click="endCall">结束呼叫</el-button>
                         </div>
-                    </template>
-                </el-dialog>
+                    </el-dialog>
+                </el-main>
 
-                <!-- 通话过程中对话框 -->
-                <el-dialog
-                    :close-on-click-modal="false"
-                    :close-on-press-escape="false"
-                    width="250px"
-                    title="    正在IP通话...."
-                    :show-close="false"
-                    v-model="callDialogVisible"
-                >
-                    <div class="dialog-content">
-                        <div class="centered-image">
-                            <img style="width: 100%; height: 100%" src="src\assets\call.png" />
-                        </div>
-                        <div class="dialog-row">
-                            <el-col>
-                                <el-text class="mx-1" size="default">{{ formatDuration }}</el-text>
-                            </el-col>
-                        </div>
-                        <el-divider />
-                        <div class="dialog-row">
-                            <el-text class="mx-1" size="small">{{ selectedCard.work_area }}</el-text>
-                        </div>
-                        <div class="dialog-row">
-                            <el-text class="mx-1" size="small">{{ selectedCard.adress_ip }}</el-text>
-                        </div>
-
-                        <div class="dialog-row">
-                            <el-text class="mx-1" size="small">{{ selectedCard.device_name }}</el-text>
-                        </div>
+                <!-- 分页 -->
+                <!-- footer -->
+                <el-footer>
+                    <div class="bottom-pagination">
+                        <el-pagination
+                            layout="prev, pager, next"
+                            :total="filteredDeviceList.length"
+                            :page-size="8"
+                            @current-change="handlePageChange"
+                            background
+                        />
                     </div>
-                    <div class="dialog-footer">
-                        <el-button round type="danger" size="large" @click="endCall">结束呼叫</el-button>
-                    </div>
-                </el-dialog>
-            </el-main>
-
-            <!-- 分页 -->
-            <!-- footer -->
-            <el-footer>
-                <div class="bottom-pagination">
-                    <el-pagination
-                        layout="prev, pager, next"
-                        :total="filteredDeviceList.length"
-                        :page-size="8"
-                        @current-change="handlePageChange"
-                        background
-                    />
-                </div>
-            </el-footer>
-        </el-container>
+                </el-footer>
+            </el-container>
+        </div>
     </div>
 </template>
 
@@ -146,6 +148,9 @@ import { deviceListApi, areaListApi } from '/@/api/backend/device/device'
 export default {
     data() {
         return {
+            clickCount: 0,
+            deviceIsLoaded: false, // 默认显示加载状态
+            areaIsloaded: false,
             currentPage: 1,
             deviceList: [],
             areaList: [],
@@ -186,13 +191,7 @@ export default {
         offlineDeviceCount() {
             return this.filteredDeviceList.filter((device) => device.status === 0).length
         },
-        // 计算设备在线和离线的书香
-        onlineNumber() {
-            return this.filteredDeviceList.filter((device) => device.status === 0).length
-        },
-        offlineNumber() {
-            return this.filteredDeviceList.filter((device) => device.status === 1).length
-        },
+
         // 计算通话时间
         formatDuration() {
             const hours = Math.floor(this.callDuration / 3600)
@@ -214,8 +213,27 @@ export default {
         this.getAreaList()
     },
     methods: {
+        handleTabDblClick(event) {
+            // 阻止默认双击事件行为
+            event.preventDefault()
+
+            // 执行您的自定义操作，不取消 name
+            // 这里可以根据您的需求进行相应的处理
+            console.log('双击事件发生，不取消 name')
+        },
         handleClick(tab) {
-            this.selectedArea = tab.name
+            this.clickCount++
+
+            // 如果点击计数达到两次
+            if (this.clickCount >= 2) {
+                // 执行您的自定义操作，不取消 name
+                // 这里可以根据您的需求进行相应的处理
+                console.log('点击两次事件发生，不取消 name')
+
+
+                return
+            }
+            this.selectedArea = tab.label
             this.currentPage = 1 // 选择新区域后重置页数
         },
         handlePageChange(newPage) {
@@ -234,10 +252,12 @@ export default {
                     // 处理响应数据
                     console.log(response.data.list)
                     this.deviceList = response.data.list
+                    this.deviceIsLoaded = true
                 })
                 .catch((error) => {
                     // 处理错误
                     console.error(error)
+                    this.deviceIsLoaded = true
                 })
         },
         // 获取设备清单
@@ -247,10 +267,12 @@ export default {
                     // 处理响应数据
                     console.log(response.data.list)
                     this.areaList = response.data.list
+                    this.areaIsloaded = true
                 })
                 .catch((error) => {
                     // 处理错误
                     console.error(error)
+                    this.areaIsloaded = true
                 })
         },
         // 呼叫方法

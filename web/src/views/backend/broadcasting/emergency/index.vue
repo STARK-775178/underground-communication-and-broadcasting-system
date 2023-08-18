@@ -1,231 +1,251 @@
 <template>
-    <div class="common-layout">
-        <el-container>
-            <!-- header -->
-            <el-header>
-                <el-tabs type="card" @tab-click="handleClick">
-                    <el-tab-pane label="所有区域"></el-tab-pane>
-                    <el-tab-pane label="公共区域1"></el-tab-pane>
-                    <el-tab-pane label="公共区域2"></el-tab-pane>
-                    <el-tab-pane label="矿区库房"></el-tab-pane>
-                    <el-tab-pane label="矿下作业区"></el-tab-pane>
-                </el-tabs>
-            </el-header>
-            <div style="display: flex; justify-content: space-between">
-                <div style="margin-left: 50px">
-                    <el-text class="mx-1" size="large">音箱数量:</el-text>
-                    <el-text style="margin-left: 3px" size="large" class="mx-1">
-                        {{ deviceNumber }}
-                    </el-text>
+    <div>
+        <div v-loading="!deviceIsLoaded && !areaIsLoaded" class="common-layout">
+            <el-container>
+                <!-- header -->
+                <el-header>
+                    <el-tabs v-model="selectedArea" type="card" @tab-click="handleClick">
+                        <el-tab-pane name="所有区域" :label="'所有区域'"></el-tab-pane>
+                        <el-tab-pane v-for="item in areaList" :key="item.id" :name="item.area" :label="item.area"></el-tab-pane>
+                    </el-tabs>
+                </el-header>
+                <div style="display: flex; justify-content: space-between">
+                    <div style="margin-left: 50px">
+                        <el-text class="mx-1" size="large">音箱数量:</el-text>
+                        <el-text style="margin-left: 3px" size="large" class="mx-1">
+                            {{ filteredDeviceList.length }}
+                        </el-text>
+                    </div>
+                    <!-- 在线设备、离线设备 -->
+                    <div style="margin-right: 80px">
+                        <!-- <el-text class="mx-1" size="large">在线</el-text> -->
+                        <el-tag type="success" class="mx-1" effect="dark" round> 在线 </el-tag>
+                        <el-text size="large" class="mx-1">{{ onlineDeviceCount }}</el-text>
+                        <!-- <el-text style="margin-left: 10px" class="mx-1" size="large">离线</el-text> -->
+                        <el-tag style="margin-left: 10px" type="warning" class="mx-1" effect="dark" round> 离线 </el-tag>
+                        <el-text size="large" class="mx-1">{{ offlineDeviceCount }}</el-text>
+                    </div>
                 </div>
-                <!-- 在线设备、离线设备 -->
-                <div style="margin-right: 80px">
-                    <!-- <el-text class="mx-1" size="large">在线</el-text> -->
-                    <el-tag type="success" class="mx-1" effect="dark" round> 在线 </el-tag>
-                    <el-text size="large" class="mx-1">{{ onlineNumber }}</el-text>
-                    <!-- <el-text style="margin-left: 10px" class="mx-1" size="large">离线</el-text> -->
-                    <el-tag style="margin-left: 10px" type="warning" class="mx-1" effect="dark" round> 离线 </el-tag>
-                    <el-text size="large" class="mx-1">{{ offlineNumber }}</el-text>
-                </div>
-            </div>
 
-            <!-- main -->
-            <el-main>
-                <div class="card-grid-container">
-                    <el-card class="box-card" v-for="card in cards" :key="card.id" body-style="padding: 0;">
-                        <template #header>
+                <!-- main -->
+                <el-main>
+                    <div class="card-grid-container">
+                        <el-card class="box-card" v-for="card in getCurrentPageDevices" :key="card.id" body-style="padding: 0;">
+                            <template #header>
+                                <div>
+                                    <el-tag
+                                        size="small"
+                                        style="margin-left: 120px; margin-top: 0"
+                                        :type="getTagType(card.status)"
+                                        class="mx-1"
+                                        effect="dark"
+                                        round
+                                    >
+                                        {{ getStatusText(card.status) }}
+                                    </el-tag>
+                                </div>
+                                <div class="centered-image">
+                                    <img style="width: 50%; height: 50%; margin-top: 0px" src="src\assets\horn.png" />
+                                </div>
+
+                                <div>
+                                    <span class="centered-text">{{ card.work_area }}</span>
+                                </div>
+                            </template>
+
+                            <div class="info-container">
+                                <div class="ip-address">
+                                    <span class="centered-text">{{ card.adress_ip }}</span>
+                                </div>
+
+                                <div class="speakers">
+                                    <span class="centered-text">{{ card.device_name }}</span>
+                                </div>
+                            </div>
+
                             <div>
-                                <el-tag size="small" style="margin-left: 120px; margin-top: 0" :type="card.tagType" class="mx-1" effect="dark" round>
-                                    {{ card.status }}
+                                <el-tag
+                                    size="large"
+                                    style="margin-left: 75px; margin-top: 10px"
+                                    :type="card.tagType"
+                                    class="mx-1"
+                                    effect="plain"
+                                    round
+                                >
+                                    <div>{{ getStatusText(card.status) }}</div>
                                 </el-tag>
                             </div>
+                        </el-card>
+                    </div>
+                    <!-- 区域广播对话框 -->
+                    <el-dialog
+                        :close-on-click-modal="false"
+                        :close-on-press-escape="false"
+                        width="800px"
+                        title="请选择紧急广播区域"
+                        v-model="selectAreaDialogVisible"
+                    >
+                        <div class="scrollable-collor">
+                            <el-scrollbar class="scrollable-container" style="width: 80%">
+                                <div v-for="(area, index) in broadcastAreas" :key="index" class="area-info">
+                                    <div class="inline-info">
+                                        <el-checkbox v-model="selectedAreasId" :label="area.id">{{ area.name }}</el-checkbox>
+                                        <p>
+                                            音箱数量：<span class="info-number">{{ area.speakers }}</span>
+                                        </p>
+                                        <p>
+                                            在线数量：<span class="info-number">{{ area.online }}</span>
+                                        </p>
+                                        <p>
+                                            离线数量：<span class="info-number">{{ area.offline }}</span>
+                                        </p>
+                                        <p>
+                                            区域人数：<span class="info-number">{{ area.population }}</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </el-scrollbar>
+                        </div>
+
+                        <div style="margin-top: 10px; display: flex; justify-content: center">
+                            <el-button
+                                class="larger-button"
+                                round
+                                type="success"
+                                size="large"
+                                :disabled="isConfirmButtonDisabled"
+                                @click="openBroadcastDialog"
+                                >开始广播</el-button
+                            >
+                        </div>
+                    </el-dialog>
+
+                    <!-- 点击呼叫全体广播 -->
+                    <el-dialog
+                        :close-on-click-modal="false"
+                        :close-on-press-escape="false"
+                        width="800px"
+                        :title="dialogBroadcastTitle"
+                        :show-close="false"
+                        v-model="allBroadcastDialogVisible"
+                    >
+                        <div class="dialog-content">
                             <div class="centered-image">
-                                <img style="width: 50%; height: 50%; margin-top: 0px" src="src\assets\horn.png" />
-                            </div>
-
-                            <div>
-                                <span class="centered-text">{{ card.area }}</span>
-                            </div>
-                        </template>
-
-                        <div class="info-container">
-                            <div class="ip-address">
-                                <span class="centered-text">{{ card.ip }}</span>
-                            </div>
-
-                            <div class="speakers">
-                                <span class="centered-text">{{ card.speaker }}</span>
+                                <img style="width: 100%; height: 100%; margin-top: 0" src="src\assets\call.png" />
                             </div>
                         </div>
-
-                        <div>
-                            <el-tag size="large" style="margin-left: 75px; margin-top: 10px" :type="card.tagType" class="mx-1" effect="plain" round>
-                                <div>{{ card.status }}</div>
-                            </el-tag>
+                        <div style="justify-content: center; align-items: center; text-align: center" class="dialog-row">
+                            <el-col>
+                                <el-text class="mx-1" size="default">{{ formatDuration }}</el-text>
+                            </el-col>
                         </div>
-                    </el-card>
-                </div>
-                <!-- 区域广播对话框 -->
-                <el-dialog
-                    :close-on-click-modal="false"
-                    :close-on-press-escape="false"
-                    width="800px"
-                    title="请选择紧急广播区域"
-                    v-model="selectAreaDialogVisible"
-                >
-                    <div class="scrollable-collor">
-                        <el-scrollbar class="scrollable-container" style="width: 80%">
-                            <div v-for="(area, index) in broadcastArea" :key="index" class="area-info">
-                                <div class="inline-info">
-                                    <el-checkbox v-model="selectedAreasId" :label="area.id">{{ area.name }}</el-checkbox>
-                                    <p>
-                                        音箱数量：<span class="info-number">{{ area.speakers }}</span>
-                                    </p>
-                                    <p>
-                                        在线数量：<span class="info-number">{{ area.online }}</span>
-                                    </p>
-                                    <p>
-                                        离线数量：<span class="info-number">{{ area.offline }}</span>
-                                    </p>
-                                    <p>
-                                        区域人数：<span class="info-number">{{ area.population }}</span>
-                                    </p>
+                        <div class="scrollable-collor">
+                            <!-- 显示全体广播区域 -->
+                            <el-scrollbar style="width: 80%" wrap-class="scrollable-container">
+                                <div v-for="areaId in selectedAreasId" :key="areaId" class="area-info">
+                                    <div class="inline-info">
+                                        <p>{{ getAreaById(areaId).name }}</p>
+                                        <p>
+                                            音箱数量：<span class="info-number">{{ getAreaById(areaId).speakers }}</span>
+                                        </p>
+                                        <p>
+                                            在线数量：<span class="info-number">{{ getAreaById(areaId).online }}</span>
+                                        </p>
+                                        <p>
+                                            离线数量：<span class="info-number">{{ getAreaById(areaId).offline }}</span>
+                                        </p>
+                                        <p>
+                                            区域人数：<span class="info-number">{{ getAreaById(areaId).population }}</span>
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
-                        </el-scrollbar>
-                    </div>
-
-                    <div style="margin-top: 10px; display: flex; justify-content: center" >
-                        <el-button class="larger-button" round type="success" size="large" :disabled="isConfirmButtonDisabled" @click="openBroadcastDialog"
-                            >开始广播</el-button
-                        >
-                    </div>
-                </el-dialog>
-
-                <!-- 点击呼叫全体广播 -->
-                <el-dialog
-                    :close-on-click-modal="false"
-                    :close-on-press-escape="false"
-                    width="800px"
-                    :title=dialogBroadcastTitle
-                    :show-close="false"
-                    v-model="allBroadcastDialogVisible"
-                >
-                    <div class="dialog-content">
-                        <div class="centered-image">
-                            <img style="width: 100%; height: 100%; margin-top: 0" src="src\assets\call.png" />
+                            </el-scrollbar>
                         </div>
-                    </div>
-                    <div style="justify-content: center; align-items: center; text-align: center" class="dialog-row">
-                        <el-col>
-                            <el-text class="mx-1" size="default">{{ formatDuration }}</el-text>
-                        </el-col>
-                    </div>
-                    <div class="scrollable-collor">
-                        <!-- 显示全体广播区域 -->
-                        <el-scrollbar style="width: 80%" wrap-class="scrollable-container">
-                            <div v-for="areaId in selectedAreasId" :key="areaId" class="area-info">
-                                <div class="inline-info">
-                                    <p>{{ getAreaById(areaId).name }}</p>
-                                    <p>
-                                        音箱数量：<span class="info-number">{{ getAreaById(areaId).speakers }}</span>
-                                    </p>
-                                    <p>
-                                        在线数量：<span class="info-number">{{ getAreaById(areaId).online }}</span>
-                                    </p>
-                                    <p>
-                                        离线数量：<span class="info-number">{{ getAreaById(areaId).offline }}</span>
-                                    </p>
-                                    <p>
-                                        区域人数：<span class="info-number">{{ getAreaById(areaId).population }}</span>
-                                    </p>
-                                </div>
-                            </div>
-                        </el-scrollbar>
-                    </div>
 
-                    <div style="margin-top: 20px" class="dialog-footer">
-                        <el-button round type="danger" size="large" @click="endEmergencyBroadcast">结束紧急广播</el-button>
+                        <div style="margin-top: 20px" class="dialog-footer">
+                            <el-button round type="danger" size="large" @click="endEmergencyBroadcast">结束紧急广播</el-button>
+                        </div>
+                    </el-dialog>
+                    <!-- 分割线 -->
+                    <!-- 分页 -->
+                    <div style="display: flex; justify-content: center; margin-top: 20px">
+                        <el-pagination
+                            layout="prev, pager, next"
+                            :total="filteredDeviceList.length"
+                            :page-size="8"
+                            @current-change="handlePageChange"
+                            background
+                        />
                     </div>
-                </el-dialog>
-                <!-- 分割线 -->
+                </el-main>
+                <!-- 全体广播对话框对话框 -->
+
+                <el-divider></el-divider>
                 <!-- 分页 -->
-                <div style="display: flex; justify-content: center; margin-top: 20px">
-                    <el-pagination background layout="prev, pager, next" :total="1000" />
-                </div>
-            </el-main>
-            <!-- 全体广播对话框对话框 -->
-
-            <el-divider></el-divider>
-            <!-- 分页 -->
-            <!-- footer -->
-            <el-footer>
-                <div class="centered-buttons">
-                    <el-button size="large" @click="emergencyBroadcast" type="danger" round class="button-spacing">全体紧急广播</el-button>
-                    <el-button size="large" @click="selectBroadcast" type="primary" round class="button-spacing">区域广播选择</el-button>
-                </div>
-            </el-footer>
-        </el-container>
+                <!-- footer -->
+                <el-footer>
+                    <div class="centered-buttons">
+                        <el-button size="large" @click="emergencyBroadcast" type="danger" round class="button-spacing">全体紧急广播</el-button>
+                        <el-button size="large" @click="selectBroadcast" type="primary" round class="button-spacing">区域广播选择</el-button>
+                    </div>
+                </el-footer>
+            </el-container>
+        </div>
     </div>
 </template>
 
 <script>
+import { deviceListApi, areaListApi } from '/@/api/backend/device/device'
 export default {
     data() {
         return {
+            clickCount: 0,
+            deviceIsLoaded: false, // 默认显示加载状态
+            areaIsloaded: false,
+            currentPage: 1,
+            deviceList: [],
+            areaList: [],
+            selectedArea: '所有区域',
+
             // 区域广播属性
             selectAreaDialogVisible: false,
             selectedAreas: [],
             selectedAreasId: [],
 
-            broadcastArea: [
-                {
-                    id: 1,
-                    name: '公共区域1',
-                    speakers: 4,
-                    online: 4,
-                    offline: 0,
-                    population: 10,
-                },
-                {
-                    id: 2,
-                    name: '公共区域2',
-                    speakers: 6,
-                    online: 4,
-                    offline: 2,
-                    population: 20,
-                },
-                {
-                    id: 3,
-                    name: '矿区库房',
-                    speakers: 2,
-                    online: 2,
-                    offline: 0,
-                    population: 6,
-                },
-                {
-                    id: 4,
-                    name: '矿下作业区',
-                    speakers: 3,
-                    online: 2,
-                    offline: 1,
-                    population: 30,
-                },
-            ],
-
-            cards: [
-                { id: 1, status: '在线', tagType: 'success', area: '公共区域1', ip: '192.168.1.17', speaker: '音箱1' },
-                { id: 2, status: '离线', tagType: 'danger', area: '公共区域2', ip: '192.168.1.18', speaker: '音箱2' },
-                { id: 3, status: '在线', tagType: 'success', area: '矿区库房', ip: '192.168.1.19', speaker: '音箱3' },
-                { id: 4, status: '离线', tagType: 'danger', area: '矿下作业区', ip: '192.168.1.20', speaker: '音箱4' },
-                { id: 5, status: '在线', tagType: 'success', area: '休息室', ip: '192.168.1.21', speaker: '音箱5' },
-                { id: 6, status: '离线', tagType: 'danger', area: '走廊', ip: '192.168.1.22', speaker: '音箱6' },
-                { id: 7, status: '在线', tagType: 'success', area: '矿下作业区', ip: '192.168.1.23', speaker: '音箱7' },
-            ],
-
-            deviceNumber: 20, //设备数量
-            onlineNumber: 10, //在线
-            offlineNumber: 10, //离线
+            // broadcastAreas: [
+            //     {
+            //         id: 1,
+            //         name: '公共区域1',
+            //         speakers: 4,
+            //         online: 4,
+            //         offline: 0,
+            //         population: 10,
+            //     },
+            //     {
+            //         id: 2,
+            //         name: '公共区域2',
+            //         speakers: 6,
+            //         online: 4,
+            //         offline: 2,
+            //         population: 20,
+            //     },
+            //     {
+            //         id: 3,
+            //         name: '矿区库房',
+            //         speakers: 2,
+            //         online: 2,
+            //         offline: 0,
+            //         population: 6,
+            //     },
+            //     {
+            //         id: 4,
+            //         name: '矿下作业区',
+            //         speakers: 3,
+            //         online: 2,
+            //         offline: 1,
+            //         population: 30,
+            //     },
+            // ],
 
             // 通话时长定时器
             callStartTime: null,
@@ -233,10 +253,63 @@ export default {
 
             // 全体广播对话框
             allBroadcastDialogVisible: false,
-            dialogBroadcastTitle:''
+            dialogBroadcastTitle: '',
         }
     },
     computed: {
+        broadcastAreas() {
+            const areaMap = new Map()
+
+            this.deviceList.forEach((device) => {
+                const areaName = device.work_area
+                const isOnline = device.status === 1
+
+                if (!areaMap.has(areaName)) {
+                    areaMap.set(areaName, {
+                        id: this.getAreaIdByName(areaName),
+                        name: areaName,
+                        speakers: 0,
+                        online: 0,
+                        offline: 0,
+                        population: this.getPopulationByAreaName(areaName),
+                    })
+                }
+
+                const area = areaMap.get(areaName)
+                area.speakers++
+                area.population = this.getPopulationByAreaName(areaName)
+
+                if (isOnline) {
+                    area.online++
+                } else {
+                    area.offline++
+                }
+            })
+
+            return Array.from(areaMap.values())
+        },
+        // 根据区域筛选数据
+        filteredDeviceList() {
+            if (this.selectedArea === '所有区域') {
+                return this.deviceList
+            } else {
+                return this.deviceList.filter((device) => device.work_area === this.selectedArea)
+            }
+        },
+        // 制作分页
+        getCurrentPageDevices() {
+            const startIndex = (this.currentPage - 1) * 8
+            const endIndex = startIndex + 8
+            return this.filteredDeviceList.slice(startIndex, endIndex)
+        },
+
+        // 计算设备在线和离线的书香
+        onlineDeviceCount() {
+            return this.filteredDeviceList.filter((device) => device.status === 1).length
+        },
+        offlineDeviceCount() {
+            return this.filteredDeviceList.filter((device) => device.status === 0).length
+        },
         // 区域广播是否被选中
         isConfirmButtonDisabled() {
             // 如果没有选中的区域，确认按钮将被禁用
@@ -256,13 +329,88 @@ export default {
             return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`
         },
     },
+    mounted() {
+        // 获取设备清单
+        this.getDeviceList()
+        // 获取广播区域清单
+        this.getAreaList()
+    },
     methods: {
+        getAreaIdByName(areaName) {
+            const area = this.areaList.find((area) => area.area === areaName)
+            return area ? area.id : null
+        },
+        getPopulationByAreaName(areaName) {
+            const area = this.areaList.find((area) => area.area === areaName)
+            return area ? area.area_population : 0
+        },
+        handleTabDblClick(event) {
+            // 阻止默认双击事件行为
+            event.preventDefault()
+
+            // 执行您的自定义操作，不取消 name
+            // 这里可以根据您的需求进行相应的处理
+            console.log('双击事件发生，不取消 name')
+        },
+        handleClick(tab) {
+            this.clickCount++
+
+            // 如果点击计数达到两次
+            if (this.clickCount >= 2) {
+                // 执行您的自定义操作，不取消 name
+                // 这里可以根据您的需求进行相应的处理
+                console.log('点击两次事件发生，不取消 name')
+
+                return
+            }
+            this.selectedArea = tab.label
+            this.currentPage = 1 // 选择新区域后重置页数
+        },
+        handlePageChange(newPage) {
+            this.currentPage = newPage
+        },
+        getStatusText(status) {
+            return status === 0 ? '离线' : status === 1 ? '在线' : '未知状态'
+        },
+        getTagType(status) {
+            return status === 0 ? 'danger' : 'success'
+        },
+        // 获取设备清单
+        getDeviceList() {
+            deviceListApi()
+                .then((response) => {
+                    // 处理响应数据
+                    console.log(response.data.list)
+                    this.deviceList = response.data.list
+                    this.deviceIsLoaded = true
+                })
+                .catch((error) => {
+                    // 处理错误
+                    console.error(error)
+                    this.deviceIsLoaded = true
+                })
+        },
+        // 获取设备清单
+        getAreaList() {
+            areaListApi()
+                .then((response) => {
+                    // 处理响应数据
+                    console.log(response.data.list)
+                    this.areaList = response.data.list
+                    this.areaIsloaded = true
+                })
+                .catch((error) => {
+                    // 处理错误
+                    console.error(error)
+                    this.areaIsloaded = true
+                })
+        },
         getAreaById(id) {
-            return this.broadcastArea.find((area) => area.id === id)
+            return this.broadcastAreas.find((area) => area.id === id)
         },
         // 区域广播确定按钮
         openBroadcastDialog() {
-            this.dialogBroadcastTitle = "正在进行区域广播"
+            this.dialogBroadcastTitle = '正在进行区域广播'
 
             this.selectAreaDialogVisible = false
             this.allBroadcastDialogVisible = true
@@ -275,8 +423,8 @@ export default {
         },
         // 全体广播按钮
         emergencyBroadcast() {
-            this.dialogBroadcastTitle = "正在进行全体紧急广播"
-            this.selectedAreasId = this.broadcastArea.map((area) => area.id)
+            this.dialogBroadcastTitle = '正在进行全体紧急广播'
+            this.selectedAreasId = this.broadcastAreas.map((area) => area.id)
             this.allBroadcastDialogVisible = true
             // 开启广播时间计时
             this.callStartTime = Date.now()

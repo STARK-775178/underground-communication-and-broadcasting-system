@@ -48,12 +48,14 @@ const baTable = new baTableClass(
             { type: 'selection', align: 'center', operator: false },
             { label: t('area.id'), prop: 'id', align: 'center', width: 70, operator: 'RANGE', sortable: 'custom' },
             { label: t('area.area'), prop: 'area', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false },
+            { label: t('area.area_number'), prop: 'area_number', align: 'center', operator: 'RANGE', sortable: false },
+            { label: t('area.area_population'), prop: 'area_population', align: 'center', operator: 'RANGE', sortable: false },
             { label: t('Operate'), align: 'center', width: 100, render: 'buttons', buttons: optButtons, operator: false },
         ],
         dblClickNotEditColumn: [undefined],
     },
     {
-        defaultItems: {},
+        defaultItems: { area_population: 0 },
     }
 )
 

@@ -10,6 +10,8 @@ use app\common\controller\Backend;
  */
 class Device extends Backend
 {
+    // 无需登录的方法列表
+protected array $noNeedLogin = ['index'];
     /**
      * Device模型对象
      * @var object
