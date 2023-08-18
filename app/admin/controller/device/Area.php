@@ -1,18 +1,18 @@
 <?php
 
-namespace app\admin\controller;
+namespace app\admin\controller\device;
 
 use app\common\controller\Backend;
 
 /**
- * 设备管理
+ * 广播区域
  */
-class Device extends Backend
+class Area extends Backend
 {
     /**
-     * Device模型对象
+     * Area模型对象
      * @var object
-     * @phpstan-var \app\admin\model\Device
+     * @phpstan-var \app\admin\model\device\Area
      */
     protected object $model;
 
@@ -23,7 +23,7 @@ class Device extends Backend
     public function initialize(): void
     {
         parent::initialize();
-        $this->model = new \app\admin\model\Device;
+        $this->model = new \app\admin\model\device\Area;
     }
 
 

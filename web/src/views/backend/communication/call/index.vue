@@ -3,19 +3,16 @@
         <el-container>
             <!-- header -->
             <el-header>
-                <el-tabs type="card" @tab-click="handleClick">
-                    <el-tab-pane label="所有区域"></el-tab-pane>
-                    <el-tab-pane label="公共区域1"></el-tab-pane>
-                    <el-tab-pane label="公共区域2"></el-tab-pane>
-                    <el-tab-pane label="矿区库房"></el-tab-pane>
-                    <el-tab-pane label="矿下作业区"></el-tab-pane>
+                <el-tabs v-model="selectedArea" type="card" @tab-click="handleClick">
+                    <el-tab-pane name="所有区域" :label="'所有区域'"></el-tab-pane>
+                    <el-tab-pane v-for="item in areaList" :key="item.id" :name="item.area" :label="item.area"></el-tab-pane>
                 </el-tabs>
             </el-header>
             <div style="display: flex; justify-content: space-between">
                 <div style="margin-left: 50px">
                     <el-text class="mx-1" size="large">音箱数量:</el-text>
                     <el-text style="margin-left: 3px" size="large" class="mx-1">
-                        {{ deviceNumber }}
+                        {{ filteredDeviceList.length }}
                     </el-text>
                 </div>
                 <!-- 在线设备、离线设备 -->
@@ -32,11 +29,18 @@
             <!-- main -->
             <el-main>
                 <div class="card-grid-container">
-                    <el-card class="box-card" v-for="card in cards" :key="card.id" body-style="padding: 0;">
+                    <el-card class="box-card" v-for="card in getCurrentPageDevices" :key="card.id" body-style="padding: 0;">
                         <template #header>
                             <div>
-                                <el-tag size="small" style="margin-left: 120px; margin-top: 0" :type="card.tagType" class="mx-1" effect="dark" round>
-                                    {{ card.status }}
+                                <el-tag
+                                    size="small"
+                                    style="margin-left: 120px; margin-top: 0"
+                                    :type="getTagType(card.status)"
+                                    class="mx-1"
+                                    effect="dark"
+                                    round
+                                >
+                                    {{ getStatusText(card.status) }}
                                 </el-tag>
                             </div>
                             <div class="centered-image">
@@ -44,22 +48,22 @@
                             </div>
 
                             <div>
-                                <span class="centered-text">{{ card.area }}</span>
+                                <span class="centered-text">{{ card.work_area }}</span>
                             </div>
                         </template>
 
                         <div class="info-container">
                             <div class="ip-address">
-                                <span class="centered-text">{{ card.ip }}</span>
+                                <span class="centered-text">{{ card.adress_ip }}</span>
                             </div>
 
                             <div class="speakers">
-                                <span class="centered-text">{{ card.speaker }}</span>
+                                <span class="centered-text">{{ card.device_name }}</span>
                             </div>
                         </div>
 
                         <div class="centered-button">
-                            <el-button :disabled="card.status === '离线'" @click="openDialog(card)" size="small">独立呼叫</el-button>
+                            <el-button :disabled="card.status === 0" @click="openDialog(card)" size="small">独立呼叫</el-button>
                         </div>
                     </el-card>
                 </div>
@@ -73,7 +77,7 @@
                     width="30%"
                 >
                     <template #default>
-                        <span>确认对 {{ selectedCard.area }}、{{ selectedCard.ip }}、{{ selectedCard.speaker }} 进行通话？</span>
+                        <span>确认对 {{ selectedCard.work_area }}、{{ selectedCard.adress_ip }}、{{ selectedCard.device_name }} 进行通话？</span>
                     </template>
                     <template #footer>
                         <div class="dialog-footer">
@@ -103,14 +107,14 @@
                         </div>
                         <el-divider />
                         <div class="dialog-row">
-                            <el-text class="mx-1" size="small">{{ selectedCard.area }}</el-text>
+                            <el-text class="mx-1" size="small">{{ selectedCard.work_area }}</el-text>
                         </div>
                         <div class="dialog-row">
-                            <el-text class="mx-1" size="small">{{ selectedCard.ip }}</el-text>
+                            <el-text class="mx-1" size="small">{{ selectedCard.adress_ip }}</el-text>
                         </div>
 
                         <div class="dialog-row">
-                            <el-text class="mx-1" size="small">{{ selectedCard.speaker }}</el-text>
+                            <el-text class="mx-1" size="small">{{ selectedCard.device_name }}</el-text>
                         </div>
                     </div>
                     <div class="dialog-footer">
@@ -123,7 +127,13 @@
             <!-- footer -->
             <el-footer>
                 <div class="bottom-pagination">
-                    <el-pagination background layout="prev, pager, next" :total="1000" />
+                    <el-pagination
+                        layout="prev, pager, next"
+                        :total="filteredDeviceList.length"
+                        :page-size="8"
+                        @current-change="handlePageChange"
+                        background
+                    />
                 </div>
             </el-footer>
         </el-container>
@@ -132,24 +142,14 @@
 
 <script>
 import { callApi } from '/@/api/backend/communication/call'
-
+import { deviceListApi, areaListApi } from '/@/api/backend/device/device'
 export default {
     data() {
         return {
-            cards: [
-                { id: 1, status: '在线', tagType: 'success', area: '公共区域1', ip: '192.168.1.17', speaker: '音箱1' },
-                { id: 2, status: '离线', tagType: 'danger', area: '公共区域2', ip: '192.168.1.18', speaker: '音箱2' },
-                { id: 3, status: '在线', tagType: 'success', area: '矿区库房', ip: '192.168.1.19', speaker: '音箱3' },
-                { id: 4, status: '离线', tagType: 'danger', area: '矿下作业区', ip: '192.168.1.20', speaker: '音箱4' },
-                { id: 5, status: '在线', tagType: 'success', area: '休息室', ip: '192.168.1.21', speaker: '音箱5' },
-                { id: 6, status: '离线', tagType: 'danger', area: '走廊', ip: '192.168.1.22', speaker: '音箱6' },
-                { id: 7, status: '在线', tagType: 'success', area: '矿下作业区', ip: '192.168.1.23', speaker: '音箱7' },
-            ],
-
-            deviceNumber: 20, //设备数量
-            onlineNumber: 10, //在线
-            offlineNumber: 10, //离线
-
+            currentPage: 1,
+            deviceList: [],
+            areaList: [],
+            selectedArea: '所有区域',
             // 确认呼叫弹窗属性
             selectedCard: null,
             dialogVisible: false,
@@ -162,7 +162,38 @@ export default {
             callDuration: 0,
         }
     },
+
     computed: {
+        // 根据区域筛选数据
+        filteredDeviceList() {
+            if (this.selectedArea === '所有区域') {
+                return this.deviceList
+            } else {
+                return this.deviceList.filter((device) => device.work_area === this.selectedArea)
+            }
+        },
+        // 制作分页
+        getCurrentPageDevices() {
+            const startIndex = (this.currentPage - 1) * 8
+            const endIndex = startIndex + 8
+            return this.filteredDeviceList.slice(startIndex, endIndex)
+        },
+
+        // 计算设备在线和离线的书香
+        onlineDeviceCount() {
+            return this.filteredDeviceList.filter((device) => device.status === 1).length
+        },
+        offlineDeviceCount() {
+            return this.filteredDeviceList.filter((device) => device.status === 0).length
+        },
+        // 计算设备在线和离线的书香
+        onlineNumber() {
+            return this.filteredDeviceList.filter((device) => device.status === 0).length
+        },
+        offlineNumber() {
+            return this.filteredDeviceList.filter((device) => device.status === 1).length
+        },
+        // 计算通话时间
         formatDuration() {
             const hours = Math.floor(this.callDuration / 3600)
             const minutes = Math.floor((this.callDuration % 3600) / 60)
@@ -175,7 +206,53 @@ export default {
             return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`
         },
     },
+
+    mounted() {
+        // 获取设备清单
+        this.getDeviceList()
+        // 获取广播区域清单
+        this.getAreaList()
+    },
     methods: {
+        handleClick(tab) {
+            this.selectedArea = tab.name
+            this.currentPage = 1 // 选择新区域后重置页数
+        },
+        handlePageChange(newPage) {
+            this.currentPage = newPage
+        },
+        getStatusText(status) {
+            return status === 0 ? '离线' : status === 1 ? '在线' : '未知状态'
+        },
+        getTagType(status) {
+            return status === 0 ? 'danger' : 'success'
+        },
+        // 获取设备清单
+        getDeviceList() {
+            deviceListApi()
+                .then((response) => {
+                    // 处理响应数据
+                    console.log(response.data.list)
+                    this.deviceList = response.data.list
+                })
+                .catch((error) => {
+                    // 处理错误
+                    console.error(error)
+                })
+        },
+        // 获取设备清单
+        getAreaList() {
+            areaListApi()
+                .then((response) => {
+                    // 处理响应数据
+                    console.log(response.data.list)
+                    this.areaList = response.data.list
+                })
+                .catch((error) => {
+                    // 处理错误
+                    console.error(error)
+                })
+        },
         // 呼叫方法
         call() {
             callApi()
@@ -187,10 +264,6 @@ export default {
                     // 处理错误
                     console.error(error)
                 })
-        },
-        // 页头点击按钮
-        handleClick(tab, event) {
-            console.log(tab, event)
         },
 
         openDialog(card) {

@@ -1,5 +1,6 @@
 export default {
     id: 'id',
+    device_type: 'device_type',
     user_name: 'user_name',
     password: 'password',
     adress_ip: 'adress_ip',
@@ -7,5 +8,8 @@ export default {
     phone: 'phone',
     device_name: 'device_name',
     work_area: 'work_area',
+    status: 'status',
+    'status 0': 'status 0',
+    'status 1': 'status 1',
     'quick Search Fields': 'id',
 }

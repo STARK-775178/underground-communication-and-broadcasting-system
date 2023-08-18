@@ -1,10 +1,10 @@
 <?php
 
-namespace app\admin\validate;
+namespace app\admin\validate\device;
 
 use think\Validate;
 
-class Device extends Validate
+class Area extends Validate
 {
     protected $failException = true;
 

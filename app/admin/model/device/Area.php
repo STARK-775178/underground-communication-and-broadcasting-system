@@ -1,16 +1,16 @@
 <?php
 
-namespace app\admin\model;
+namespace app\admin\model\device;
 
 use think\Model;
 
 /**
- * Device
+ * Area
  */
-class Device extends Model
+class Area extends Model
 {
     // 表名
-    protected $name = 'device';
+    protected $name = 'broad_area';
 
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = false;
