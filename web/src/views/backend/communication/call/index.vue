@@ -1,10 +1,10 @@
 <template>
     <div v-loading="!deviceIsLoaded && !areaIsLoaded">
         <div class="common-layout">
-            <el-container >
+            <el-container>
                 <!-- header -->
                 <el-header>
-                    <el-tabs  v-model="selectedArea" type="card" @tab-click="handleClick">
+                    <el-tabs v-model="selectedArea" type="card" @tab-click="handleClick">
                         <el-tab-pane name="所有区域" :label="'所有区域'"></el-tab-pane>
                         <el-tab-pane v-for="item in areaList" :key="item.id" :name="item.area" :label="item.area"></el-tab-pane>
                     </el-tabs>
@@ -189,6 +189,7 @@ export default {
             return this.filteredDeviceList.filter((device) => device.status === 1).length
         },
         offlineDeviceCount() {
+            call
             return this.filteredDeviceList.filter((device) => device.status === 0).length
         },
 
@@ -230,7 +231,6 @@ export default {
                 // 这里可以根据您的需求进行相应的处理
                 console.log('点击两次事件发生，不取消 name')
 
-
                 return
             }
             this.selectedArea = tab.label
@@ -252,7 +252,11 @@ export default {
                     // 处理响应数据
                     console.log(response.data.list)
                     this.deviceList = response.data.list
+
                     this.deviceIsLoaded = true
+                    if (response.data.code != 200) {
+                        this.$message.error(response.data.message)
+                    }
                 })
                 .catch((error) => {
                     // 处理错误
@@ -276,8 +280,8 @@ export default {
                 })
         },
         // 呼叫方法
-        call() {
-            callApi()
+        call(extension) {
+            callApi(extension)
                 .then((response) => {
                     // 处理响应数据
                     console.log(response)
@@ -297,7 +301,7 @@ export default {
             console.log('Confirmed call for', this.selectedCard)
             this.dialogVisible = false // Hide the dialog after confirmation
             this.callDialogVisible = true //开启呼叫的弹窗
-
+            this.call(this.selectedCard.phone)
             // 开启通话计时
             this.callStartTime = Date.now()
             setInterval(() => {

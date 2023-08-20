@@ -12,69 +12,79 @@ use app\common\controller\Backend;
 class Call extends Backend
 {
     // 无需登录的方法列表
-    protected array $noNeedLogin = ['call'];
+    protected array $noNeedLogin = ['call','callByUrl'];
 
 
     /*
      * 发起呼叫请求
      */
-    public function call() {
+    public function call($extension)
+    {
+
+
+        $options = [
+            'host' => '192.168.1.13',
+            'scheme' => 'tcp://',
+            'port' => 5038,
+            'username' => 'admin',
+            'secret' => 'MeYFBp4ccXtT',
+            'connect_timeout' => 20000,
+            'read_timeout' => 20000
+        ];
+
+        $pamiClient = new PamiClient($options);
+
+        // 尝试连接到Asterisk
         try {
-            $options = [
-                'host' => '192.168.1.17',
-                'scheme' => 'tcp://',
-                'port' => 5038,
-                'username' => 'myadmin',
-                'secret' => 'myadmin',
-                'connect_timeout' => 2000,
-                'read_timeout' => 2000
-            ];
+            $pamiClient->open();
+        } catch (\Exception $connectException) {
+            // 处理连接失败异常
+            // 例如：日志记录、通知用户等
+            $this->error('', [
+                'success' => false,
+                'message' => '连接Asterisk失败：' . $connectException->getMessage(),
+                'data' => null
+            ], 500);
+            return;
+        }
 
-            $pamiClient = new PamiClient($options);
-
-            // 尝试连接到Asterisk
-            try {
-                $pamiClient->open();
-            } catch (\Exception $connectException) {
-                // 处理连接失败异常
-                // 例如：日志记录、通知用户等
-                $this->success('',[
-                    'success' => false,
-                    'message' => '连接Asterisk失败：' . $connectException->getMessage(),
-                    'data' => null
-                ]);
-                return;
-            }
-
+        try {
             $action = new OriginateAction('PJSIP/2001');
             $action->setContext('from-internal');
             $action->setPriority('1');
-            $action->setExtension('2004');
+            $action->setExtension($extension);
             $action->setCallerId('2001');
-            $action->setTimeout(2000); // 2 seconds
-
-            // 发送外呼请求
+            $action->setTimeout(20000); //
             $response = $pamiClient->send($action);
+            if ($response->isSuccess()) {
+                // Send the outbound request
+                $this->success('', [
+                    'success' => true,
+                    'message' => '请求成功',
+                    'data' => $response
+                ],200);
+            } else {
+                // Handle the case when the requested number does not exist
+                $this->error('', [
+                    'success' => false,
+                    'message' => '请求失败：号码不存在',
+                    'data' => null
+                ],500);
+            }
 
+            $pamiClient->close();
+        } catch (Exception $e) {
+            // Handle other exceptions that may occur during the call initiation
+            $this->error('', [
+                'success' => false,
+                'message' => '请求失败：' . $e->getMessage(),
+                'data' => null
+            ],500);
+        }
 
-
-            $this->success('',[
-                'success' => true,
-                'message' => '请求成功',
-                'data' => $response // 这里使用实际的响应数据
-            ]);
-
-            // 关闭连接
             $pamiClient->close();
 
-        } catch (\Exception $e) {
-            // 处理其他异常
-            // 例如：日志记录、通知用户等
-            $this->success('',[
-                'success' => false,
-                'message' => '发生异常：' . $e->getMessage(),
-                'data' => null
-            ]);
-        }
+
     }
+
 }

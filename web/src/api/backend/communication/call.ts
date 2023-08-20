@@ -1,8 +1,8 @@
 import createAxios from '/@/utils/axios'
 
-export function callApi() {
+export function callApi(extension: string) {
     return createAxios({
-        url: '/admin/communication.Call/call?server=1',
+        url: '/admin/communication.Call/call?server=1&extension='+extension,
         method: 'get',
     })
 }

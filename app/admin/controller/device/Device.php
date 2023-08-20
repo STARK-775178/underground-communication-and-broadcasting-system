@@ -2,16 +2,19 @@
 
 namespace app\admin\controller\device;
 
+use function Symfony\Component\Mime\toString;
 use Throwable;
 use app\common\controller\Backend;
 
+use PAMI\Client\Impl\ClientImpl;
+use PAMI\Message\Action\ExtensionStateAction;
 /**
  * 设备管理
  */
 class Device extends Backend
 {
     // 无需登录的方法列表
-protected array $noNeedLogin = ['index'];
+    protected array $noNeedLogin = ['index'];
     /**
      * Device模型对象
      * @var object
@@ -58,11 +61,65 @@ protected array $noNeedLogin = ['index'];
             ->paginate($limit);
         $res->visible(['workAreaTable' => ['string']]);
 
-        $this->success('', [
-            'list'   => $res->items(),
+        // 将JSON转换为关联数组
+        $dataArr = $res->items();
+        // 创建 PAMI 客户端实例
+        $clientOptions = array(
+            'host' => '192.168.1.13',
+            'port' => '5038',
+            'username' => 'admin',
+            'secret' => 'MeYFBp4ccXtT',
+            'connect_timeout' => 10000,
+            'read_timeout' => 10000
+        );
+        $client = new ClientImpl($clientOptions);
+
+        // 连接到 Asterisk 服务器
+        try {
+            $client->open();
+        } catch (\Exception $e) {
+
+            $this->error('连接到Asterisk服务器失败',null,500);
+            return;
+        }
+
+        foreach ($dataArr as &$item) {
+            $extension = $item['phone'];
+
+            // 创建 ExtensionStateAction 并设置要查询的分机号
+            $action = new ExtensionStateAction($extension,'from-internal');
+
+            try {
+                // 发送 Action 请求到 Asterisk 服务器
+                $response = $client->send($action);
+//                var_dump($response);
+                if ($response->isSuccess()) {
+                    // 获取状态信息
+                    $status = $response->getKeys()['status'];
+
+                    // 假设状态为 0 表示离线，其他值表示在线
+                    $item['status'] = ($status == '0') ? 1 : 0;
+                } else {
+                    $this->error('查询分机状态失败',null,500);
+
+                }
+            } catch (\Exception $e) {
+                $this->error('查询分级状态出错',null,500);
+
+            }
+        }
+
+        // 关闭 PAMI 客户端连接
+        $client->close();
+
+
+        // 更新后的带有修改后状态的数据
+        $updatedData = $dataArr;
+        $this->success('设备清单查询成功', [
+            'list'   => $updatedData,
             'total'  => $res->total(),
             'remark' => get_route_remark(),
-        ]);
+        ],200);
     }
 
     /**

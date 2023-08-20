@@ -31,7 +31,10 @@
         "ext-json": "*",
         "ext-gd": "*",
         "marcelog/pami": "2.0.0",
-	    "monolog/monolog": "^2.0"
+"php-ari/php-ari": "^2.0"
+
+
+
     },
     "require-dev": {
         "symfony/var-dumper": "^5.4",
