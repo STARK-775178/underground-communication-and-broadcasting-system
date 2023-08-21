@@ -6,3 +6,10 @@ export function callApi(extension: string) {
         method: 'get',
     })
 }
+
+export function hangupApi(extension: string) {
+    return createAxios({
+        url: '/admin/communication.Call/hangup?server=1&extension='+extension,
+        method: 'get',
+    })
+}

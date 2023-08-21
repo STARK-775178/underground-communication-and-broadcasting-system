@@ -6,13 +6,17 @@ namespace app\admin\controller\communication;
 
 use PAMI\Client\Impl\ClientImpl as PamiClient;
 use PAMI\Message\Action\OriginateAction;
-
+use PAMI\Message\Action\HangupAction;
 use app\common\controller\Backend;
-
+use app\admin\controller\communication\PJSIPClient;
+use PAMI\Message\Action\CoreShowChannelsAction;
 class Call extends Backend
 {
+
+
     // 无需登录的方法列表
-    protected array $noNeedLogin = ['call','callByUrl'];
+    protected array $noNeedLogin = ['call','hangup',];
+
 
 
     /*
@@ -20,6 +24,8 @@ class Call extends Backend
      */
     public function call($extension)
     {
+//        $client = new PJSIPClient();
+//        $client->callExtension($extension);
 
 
         $options = [
@@ -44,7 +50,7 @@ class Call extends Backend
                 'success' => false,
                 'message' => '连接Asterisk失败：' . $connectException->getMessage(),
                 'data' => null
-            ], 500);
+            ]);
             return;
         }
 
@@ -62,14 +68,14 @@ class Call extends Backend
                     'success' => true,
                     'message' => '请求成功',
                     'data' => $response
-                ],200);
+                ]);
             } else {
                 // Handle the case when the requested number does not exist
                 $this->error('', [
                     'success' => false,
                     'message' => '请求失败：号码不存在',
                     'data' => null
-                ],500);
+                ]);
             }
 
             $pamiClient->close();
@@ -79,12 +85,77 @@ class Call extends Backend
                 'success' => false,
                 'message' => '请求失败：' . $e->getMessage(),
                 'data' => null
-            ],500);
+            ]);
         }
 
             $pamiClient->close();
 
+    }
 
+
+    public function hangup($extension){
+//        $client = new PJSIPClient();
+//        $client->hangupByExtension($extension);
+        $options = [
+            'host' => '192.168.1.13',
+            'scheme' => 'tcp://',
+            'port' => 5038,
+            'username' => 'admin',
+            'secret' => 'MeYFBp4ccXtT',
+            'connect_timeout' => 20000,
+            'read_timeout' => 20000
+        ];
+
+        $pamiClient = new PamiClient($options);
+
+        // 尝试连接到Asterisk
+        try {
+            $pamiClient->open();
+        } catch (\Exception $connectException) {
+            // 处理连接失败异常
+            // 例如：日志记录、通知用户等
+            $this->error('', [
+                'success' => false,
+                'message' => '连接Asterisk失败：' . $connectException->getMessage(),
+                'data' => null
+            ]);
+            return;
+        }
+
+        $coreShowChannelsAction = new CoreShowChannelsAction();
+        $response = $pamiClient->send($coreShowChannelsAction);
+
+        if ($response->isSuccess()) {
+            $channels = $response->getEvents();
+//            var_dump($channels);
+            $hangupPerformed = false;
+            foreach ($channels as $channel) {
+                $channelId = $channel->getKey('channel');
+                // 在此处执行挂断操作，例如调用 hangupChannel() 方法
+                // Check if the channel ID contains "2004"
+                if (strpos($channelId, $extension) !== false) {
+                    // Perform the hangup operation using the hangupChannel() method
+//                    $this->hangupChannel($channelId);
+                    $hangupAction = new HangupAction($channelId);
+                    $hangupResponse = $pamiClient->send($hangupAction);
+                    if ($hangupResponse->isSuccess()) {
+                        $hangupPerformed = true;
+                        $this->success('挂断成功',null);
+
+                    } else {
+                        $hangupPerformed = true;
+                        $this->error('挂断失败',null);
+                    }
+
+
+                }
+            }
+            if($hangupPerformed===false){
+                $this->success('Channel已经挂断');
+            }
+        } else {
+            $this->error('获取channel失败',null);
+        }
     }
 
 }

@@ -22,7 +22,7 @@ class Device extends Backend
      */
     protected object $model;
 
-    protected string|array $defaultSortField = 'id,asc';
+    protected string|array $defaultSortField = 'status,desc';
 
     protected array|string $preExcludeFields = ['id', 'status'];
 
@@ -115,11 +115,18 @@ class Device extends Backend
 
         // 更新后的带有修改后状态的数据
         $updatedData = $dataArr;
+
+// 从数组中提取status列作为排序依据
+        $statusArray = array_column($updatedData, 'status');
+
+// 使用array_multisort()函数排序
+        array_multisort($statusArray, SORT_DESC, $updatedData);
+
         $this->success('设备清单查询成功', [
             'list'   => $updatedData,
             'total'  => $res->total(),
             'remark' => get_route_remark(),
-        ],200);
+        ]);
     }
 
     /**

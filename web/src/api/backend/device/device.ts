@@ -3,7 +3,7 @@ import createAxios from '/@/utils/axios'
 
 export function deviceListApi() {
     return createAxios({
-        url: '/admin/device.Device/index?order=id,asc',
+        url: '/admin/device.Device/index?order=id,desc',
         method: 'get',
     })
 }

@@ -20,10 +20,10 @@
                     <div style="margin-right: 80px">
                         <!-- <el-text class="mx-1" size="large">在线</el-text> -->
                         <el-tag type="success" class="mx-1" effect="dark" round> 在线 </el-tag>
-                        <el-text size="large" class="mx-1">{{ onlineNumber }}</el-text>
+                        <el-text size="large" class="mx-1">{{ onlineDeviceCount }}</el-text>
                         <!-- <el-text style="margin-left: 10px" class="mx-1" size="large">离线</el-text> -->
                         <el-tag style="margin-left: 10px" type="warning" class="mx-1" effect="dark" round> 离线 </el-tag>
-                        <el-text size="large" class="mx-1">{{ offlineNumber }}</el-text>
+                        <el-text size="large" class="mx-1">{{ offlineDeviceCount }}</el-text>
                     </div>
                 </div>
 
@@ -143,7 +143,7 @@
 </template>
 
 <script>
-import { callApi } from '/@/api/backend/communication/call'
+import { callApi, hangupApi } from '/@/api/backend/communication/call'
 import { deviceListApi, areaListApi } from '/@/api/backend/device/device'
 export default {
     data() {
@@ -189,7 +189,6 @@ export default {
             return this.filteredDeviceList.filter((device) => device.status === 1).length
         },
         offlineDeviceCount() {
-            call
             return this.filteredDeviceList.filter((device) => device.status === 0).length
         },
 
@@ -252,11 +251,7 @@ export default {
                     // 处理响应数据
                     console.log(response.data.list)
                     this.deviceList = response.data.list
-
                     this.deviceIsLoaded = true
-                    if (response.data.code != 200) {
-                        this.$message.error(response.data.message)
-                    }
                 })
                 .catch((error) => {
                     // 处理错误
@@ -277,6 +272,22 @@ export default {
                     // 处理错误
                     console.error(error)
                     this.areaIsloaded = true
+                })
+        },
+        // 结束通话方法
+        hangup(extension) {
+            hangupApi(extension)
+                .then((response) => {
+                    // 处理响应数据
+                    console.log(response)
+                    this.$message({
+                        type: 'info',
+                        message: response.data.message,
+                    })
+                })
+                .catch((error) => {
+                    // 处理错误
+                    console.error(error)
                 })
         },
         // 呼叫方法
@@ -320,6 +331,7 @@ export default {
         },
         // 结束呼叫按钮
         endCall() {
+            this.hangup(this.selectedCard.phone)
             clearInterval(this.intervalId)
             this.callTime = 0
             this.callDialogVisible = false

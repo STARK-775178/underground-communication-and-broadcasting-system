@@ -8,11 +8,20 @@ const pageTitle = (name: string): string => {
  * 静态路由
  */
 const staticRoutes: Array<RouteRecordRaw> = [
+    // {
+    //     // 首页
+    //     path: '/',
+    //     name: '/',
+    //     component: () => import('/@/views/frontend/index.vue'),
+    //     meta: {
+    //         title: pageTitle('home'),
+    //     },
+    // },
     {
         // 首页
         path: '/',
         name: '/',
-        component: () => import('/@/views/frontend/index.vue'),
+        component: () => import('/@/views/backend/index.vue'),
         meta: {
             title: pageTitle('home'),
         },
