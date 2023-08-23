@@ -2,10 +2,10 @@
 
 namespace app\admin\controller\device;
 
-use function Symfony\Component\Mime\toString;
+
 use Throwable;
 use app\common\controller\Backend;
-
+use app\admin\utils\GraphQLRequest;
 use PAMI\Client\Impl\ClientImpl;
 use PAMI\Message\Action\ExtensionStateAction;
 /**
@@ -13,28 +13,138 @@ use PAMI\Message\Action\ExtensionStateAction;
  */
 class Device extends Backend
 {
+protected array $noNeedLogin = ['add', 'index'];
     // 无需登录的方法列表
-    protected array $noNeedLogin = ['index'];
+
     /**
      * Device模型对象
      * @var object
      * @phpstan-var \app\admin\model\device\Device
      */
-    protected object $model;
+protected object $model;
 
-    protected string|array $defaultSortField = 'status,desc';
+protected string|array $defaultSortField = 'status,desc';
 
-    protected array|string $preExcludeFields = ['id', 'status'];
+protected array|string $preExcludeFields = ['id', 'status'];
 
-    protected array $withJoinTable = ['workAreaTable'];
+protected array $withJoinTable = ['workAreaTable'];
 
-    protected string|array $quickSearchField = ['id'];
+protected string|array $quickSearchField = ['id'];
 
     public function initialize(): void
     {
         parent::initialize();
         $this->model = new \app\admin\model\device\Device;
     }
+
+
+    /**
+     * 添加
+     */
+    public function add(): void
+    {
+        if ($this->request->isPost()) {
+            $data = $this->request->post();
+            if (!$data) {
+                $this->error(__('Parameter %s can not be empty', ['']));
+            }
+
+            $data = $this->excludeFields($data);
+
+
+            if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
+                $data[$this->dataLimitField] = $this->auth->id;
+            }
+
+            $result = false;
+            $this->model->startTrans();
+            try {
+                // 模型验证
+                if ($this->modelValidate) {
+                    $validate = str_replace("\\model\\", "\\validate\\", get_class($this->model));
+                    if (class_exists($validate)) {
+                        $validate = new $validate;
+                        if ($this->modelSceneValidate) $validate->scene('add');
+                        $validate->check($data);
+                    }
+                }
+                //            freepbx交互
+                $username = $data['user_name'];
+
+                $deviceName = $data['device_name'];
+                //        与freepbx交互
+                $query = 'mutation {
+    addExtension(
+        input: {
+            extensionId: ' . $username . '
+            name: "' . $deviceName . '"
+            tech: "pjsip"
+            channelName: "' . $username . '"
+            outboundCid: "' . $username . '"
+            email: "' . $username . '@gmailcom"
+            umGroups: "1"
+            umEnable: true
+            umPassword: "' . $username . '"
+            vmPassword: "' . $username . '"
+            vmEnable: true
+            callerID: "' . $username . '"
+            emergencyCid: "' . $username . '"
+            maxContacts: "3"
+        }
+    ) {
+        status
+        message
+    }
+}';
+
+
+                $gqlRequest = new GraphQLRequest();
+
+                $gqlResult = $gqlRequest->sendQuery($query);
+
+
+                $queryPwd = 'query{
+  fetchExtension(extensionId: "' . $username . '") {
+    status
+    message
+    id
+    extensionId
+    user {
+      extPassword
+    }
+    
+    }
+  }';
+                $gqlPwd = $gqlRequest->sendQuery($queryPwd);
+
+
+                $password = $gqlPwd['data']['fetchExtension']['user']['extPassword'];
+                $data['password'] = $password;
+
+//                数据库部分
+                $result = $this->model->save($data);
+                $this->model->commit();
+
+
+
+
+                        } catch (Throwable $e) {
+                $this->model->rollback();
+                $this->error($e->getMessage());
+            }
+            if ($result !== false) {
+                $this->success(__('Added successfully'));
+            } else {
+                $this->error(__('No rows were added'));
+            }
+        }
+
+        $this->error(__('Parameter error'));
+    }
+
+
+
+
 
     /**
      * 查看
@@ -128,6 +238,8 @@ class Device extends Backend
             'remark' => get_route_remark(),
         ]);
     }
+
+
 
     /**
      * 若需重写查看、编辑、删除等方法，请复制 @see \app\admin\library\traits\Backend 中对应的方法至此进行重写

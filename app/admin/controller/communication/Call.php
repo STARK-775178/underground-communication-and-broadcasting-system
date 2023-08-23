@@ -4,20 +4,59 @@ namespace app\admin\controller\communication;
 
 
 
+
 use PAMI\Client\Impl\ClientImpl as PamiClient;
 use PAMI\Message\Action\OriginateAction;
 use PAMI\Message\Action\HangupAction;
 use app\common\controller\Backend;
-use app\admin\controller\communication\PJSIPClient;
 use PAMI\Message\Action\CoreShowChannelsAction;
+use app\admin\utils\GraphQLRequest;
+
 class Call extends Backend
 {
 
 
     // 无需登录的方法列表
-    protected array $noNeedLogin = ['call','hangup',];
+    protected array $noNeedLogin = ['call','hangup','test'];
 
+    public function test(){
 
+        $query = 'query{
+
+    fetchAllExtensions {
+        status
+        message
+        totalCount
+        extension {
+            id
+            extensionId
+            user {
+              name
+              password
+              outboundCid
+              ringtimer
+              noanswer
+              sipname
+              password
+              extPassword
+            }
+              coreDevice {
+              deviceId
+              dial
+              devicetype
+              description
+              emergencyCid
+            }
+        }
+    }
+
+}';
+    $gqlRequest = new GraphQLRequest();
+
+    $result = $gqlRequest->sendQuery($query);
+
+    var_dump($result);
+    }
 
     /*
      * 发起呼叫请求
