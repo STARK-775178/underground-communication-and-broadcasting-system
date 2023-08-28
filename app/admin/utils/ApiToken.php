@@ -10,7 +10,7 @@
 namespace app\admin\utils;
 
 class ApiToken {
-    private $accessTokenUrl = 'http://192.168.1.13:80/admin/api/api/token';
+    private $accessTokenUrl = 'http://192.168.1.4:80/admin/api/api/token';
     private $clientId = 'ac98f618b36bf237bb13b733078d2d8697903434d1e3112510d2b6d063745068';
     private $clientSecret = '0560836fc095ac70f1a08dccb472aafb';
 

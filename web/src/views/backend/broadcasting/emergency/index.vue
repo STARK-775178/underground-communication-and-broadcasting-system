@@ -196,6 +196,7 @@
 
 <script>
 import { deviceListApi, areaListApi } from '/@/api/backend/device/device'
+import { callApi, hangupApi } from '/@/api/backend/communication/call'
 export default {
     data() {
         return {
@@ -423,16 +424,26 @@ export default {
         },
         // 全体广播按钮
         emergencyBroadcast() {
-            this.dialogBroadcastTitle = '正在进行全体紧急广播'
-            this.selectedAreasId = this.broadcastAreas.map((area) => area.id)
-            this.allBroadcastDialogVisible = true
-            // 开启广播时间计时
-            this.callStartTime = Date.now()
-            setInterval(() => {
-                const currentTime = Date.now()
-                this.callDuration = Math.floor((currentTime - this.callStartTime) / 1000)
-            }, 1000)
             //TODO 全体广播逻辑
+            // 进行全体广播呼叫方法
+            callApi('3000')
+                .then((response) => {
+                    // 处理响应数据
+                    console.log(response)
+                    this.dialogBroadcastTitle = '正在进行全体紧急广播'
+                    this.selectedAreasId = this.broadcastAreas.map((area) => area.id)
+                    this.allBroadcastDialogVisible = true
+                    // 开启广播时间计时
+                    this.callStartTime = Date.now()
+                    setInterval(() => {
+                        const currentTime = Date.now()
+                        this.callDuration = Math.floor((currentTime - this.callStartTime) / 1000)
+                    }, 1000)
+                })
+                .catch((error) => {
+                    // 处理错误
+                    console.error(error)
+                })
         },
 
         selectBroadcast() {

@@ -68,7 +68,7 @@ class Call extends Backend
 
 
         $options = [
-            'host' => '192.168.1.13',
+            'host' => '192.168.1.4',
             'scheme' => 'tcp://',
             'port' => 5038,
             'username' => 'admin',
@@ -136,7 +136,7 @@ class Call extends Backend
 //        $client = new PJSIPClient();
 //        $client->hangupByExtension($extension);
         $options = [
-            'host' => '192.168.1.13',
+            'host' => '192.168.1.4',
             'scheme' => 'tcp://',
             'port' => 5038,
             'username' => 'admin',

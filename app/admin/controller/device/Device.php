@@ -13,7 +13,7 @@ use PAMI\Message\Action\ExtensionStateAction;
  */
 class Device extends Backend
 {
-protected array $noNeedLogin = ['add', 'index'];
+protected array $noNeedLogin = ['add', 'index','del','test'];
     // 无需登录的方法列表
 
     /**
@@ -22,6 +22,8 @@ protected array $noNeedLogin = ['add', 'index'];
      * @phpstan-var \app\admin\model\device\Device
      */
 protected object $model;
+
+protected object $pagingGroupsModel;
 
 protected string|array $defaultSortField = 'status,desc';
 
@@ -35,11 +37,26 @@ protected string|array $quickSearchField = ['id'];
     {
         parent::initialize();
         $this->model = new \app\admin\model\device\Device;
+
+        $this->pagingGroupsModel = new \app\admin\model\broadcast\PagingGroups;
     }
+
+
+
+    /*
+     *   添加广播组测试
+     */
+    public function test(): void{
+        $this->pagingGroupsModel->page_number = '3000';
+        $this->pagingGroupsModel->ext = '2001';
+        $this->pagingGroupsModel->save();
+    }
+
 
 
     /**
      * 添加
+     * @author 冯钰卓
      */
     public function add(): void
     {
@@ -121,6 +138,11 @@ protected string|array $quickSearchField = ['id'];
                 $password = $gqlPwd['data']['fetchExtension']['user']['extPassword'];
                 $data['password'] = $password;
 
+//                freepbx asterisk数据库
+                $this->pagingGroupsModel->page_number = '3000';
+                $this->pagingGroupsModel->ext =$username;
+                $this->pagingGroupsModel->save();
+
 //                数据库部分
                 $result = $this->model->save($data);
                 $this->model->commit();
@@ -148,6 +170,7 @@ protected string|array $quickSearchField = ['id'];
 
     /**
      * 查看
+     * @author 冯钰卓
      * @throws Throwable
      */
     public function index(): void
@@ -175,7 +198,7 @@ protected string|array $quickSearchField = ['id'];
         $dataArr = $res->items();
         // 创建 PAMI 客户端实例
         $clientOptions = array(
-            'host' => '192.168.1.13',
+            'host' => '192.168.1.4',
             'port' => '5038',
             'username' => 'admin',
             'secret' => 'MeYFBp4ccXtT',
@@ -239,7 +262,98 @@ protected string|array $quickSearchField = ['id'];
         ]);
     }
 
+    /**
+     * 删除
+     * @author 冯钰卓
+     * @param array $ids
+     * @throws Throwable
+     */
+    public function del(array $ids = []): void
+    {
 
+        list($where, $alias, $limit, $order) = $this->queryBuilder();
+        $res = $this->model
+            ->field($this->indexField)
+            ->withJoin($this->withJoinTable, $this->withJoinType)
+            ->alias($alias)
+            ->where($where)
+            ->order($order)
+            ->paginate($limit);
+
+        $filteredData = [];
+        $dataArr = $res->items();
+        foreach ($dataArr as $item) {
+            if (in_array($item['id'], $ids)) {
+                $filteredData[] = $item;
+            }
+        }
+
+
+        foreach ($filteredData as &$item) {
+            $extensionID = $item['user_name'];
+
+            $queryDelExt = 'mutation {
+    deleteExtension(
+        input: { extensionId: '.$extensionID.' }
+    ) {
+        status
+        message
+    }
+}';
+            $gqlRequest = new GraphQLRequest();
+            $gqlResult = $gqlRequest->sendQuery($queryDelExt);
+        }
+
+
+        if (!$this->request->isDelete() || !$ids) {
+            $this->error(__('Parameter error'));
+        }
+
+        //        与freepbx交互
+        $query = 'mutation {
+        deleteExtension(
+            input: { extensionId:  }
+    ) {
+            status
+        message
+    }
+}';
+
+
+        $gqlRequest = new GraphQLRequest();
+
+        $gqlResult = $gqlRequest->sendQuery($query);
+
+
+
+
+        $where             = [];
+        $dataLimitAdminIds = $this->getDataLimitAdminIds();
+        if ($dataLimitAdminIds) {
+            $where[] = [$this->dataLimitField, 'in', $dataLimitAdminIds];
+        }
+
+        $pk      = $this->model->getPk();
+        $where[] = [$pk, 'in', $ids];
+
+        $count = 0;
+        $data  = $this->model->where($where)->select();
+        $this->model->startTrans();
+        try {
+            foreach ($data as $v) {
+                $count += $v->delete();
+            }
+            $this->model->commit();
+        } catch (Throwable $e) {
+            $this->model->rollback();
+            $this->error($e->getMessage());
+        }
+        if ($count) {
+            $this->success(__('Deleted successfully'));
+        } else {
+            $this->error(__('No rows were deleted'));
+        }
+    }
 
     /**
      * 若需重写查看、编辑、删除等方法，请复制 @see \app\admin\library\traits\Backend 中对应的方法至此进行重写

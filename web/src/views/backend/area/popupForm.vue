@@ -31,7 +31,6 @@
                     :rules="rules"
                 >
                     <FormItem :label="t('area.area')" type="string" v-model="baTable.form.items!.area" prop="area" :placeholder="t('Please input field', { field: t('area.area') })" />
-                    <FormItem :label="t('area.area_number')" type="string" v-model="baTable.form.items!.area_number" prop="area_number" :placeholder="t('Please input field', { field: t('area.area_number') })" />
                     <FormItem :label="t('area.area_population')" type="number" prop="area_population" :input-attr="{ step: 1 }" v-model.number="baTable.form.items!.area_population" :placeholder="t('Please input field', { field: t('area.area_population') })" />
                 </el-form>
             </div>
@@ -61,7 +60,6 @@ const baTable = inject('baTable') as baTableClass
 const { t } = useI18n()
 
 const rules: Partial<Record<string, FormItemRule[]>> = reactive({
-    area_number: [buildValidatorData({ name: 'number', title: t('area.area_number') })],
     area_population: [buildValidatorData({ name: 'number', title: t('area.area_population') })],
 })
 </script>

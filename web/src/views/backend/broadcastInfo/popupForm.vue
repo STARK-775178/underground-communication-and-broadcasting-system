@@ -13,8 +13,7 @@
             <div class="title" v-drag="['.ba-operate-dialog', '.el-dialog__header']" v-zoom="'.ba-operate-dialog'">
                 {{ baTable.form.operate ? t(baTable.form.operate) : '' }}
             </div>
-        </template>1
-
+        </template>
         <el-scrollbar v-loading="baTable.form.loading" class="ba-table-form-scrollbar">
             <div
                 class="ba-operate-form"
@@ -31,14 +30,8 @@
                     :label-width="baTable.form.labelWidth + 'px'"
                     :rules="rules"
                 >
-                    <FormItem :label="t('device.device_type')" type="string" v-model="baTable.form.items!.device_type" prop="device_type" :placeholder="t('Please input field', { field: t('device.device_type') })" />
-                    <FormItem :label="t('device.user_name')" type="string" v-model="baTable.form.items!.user_name" prop="user_name" :placeholder="t('Please input field', { field: t('device.user_name') })" />
-                    <!-- <FormItem :label="t('device.password')" type="string" v-model="baTable.form.items!.password" prop="password" :placeholder="t('Please input field', { field: t('device.password') })" /> -->
-                    <FormItem :label="t('device.adress_ip')" type="string" v-model="baTable.form.items!.adress_ip" prop="adress_ip" :placeholder="t('Please input field', { field: t('device.adress_ip') })" />
-                    <FormItem :label="t('device.port')" type="number" prop="port" :input-attr="{ step: 1 }" v-model.number="baTable.form.items!.port" :placeholder="t('Please input field', { field: t('device.port') })" />
-                    <FormItem :label="t('device.phone')" type="string" v-model="baTable.form.items!.phone" prop="phone" :placeholder="t('Please input field', { field: t('device.phone') })" />
-                    <FormItem :label="t('device.device_name')" type="string" v-model="baTable.form.items!.device_name" prop="device_name" :placeholder="t('Please input field', { field: t('device.device_name') })" />
-                    <FormItem :label="t('device.work_area')" type="remoteSelect" v-model="baTable.form.items!.work_area" prop="work_area" :input-attr="{ pk: 'cbroad_area.area', field: 'area', 'remote-url': '/admin/device.Area/index' }" :placeholder="t('Please select field', { field: t('device.work_area') })" />
+                    <FormItem :label="t('broadcastInfo.broadcast_area_ids')" type="remoteSelects" v-model="baTable.form.items!.broadcast_area_ids" prop="broadcast_area_ids" :input-attr="{ pk: 'cbroad_area.id', field: 'area', 'remote-url': '/admin/device.Area/index' }" :placeholder="t('Please select field', { field: t('broadcastInfo.broadcast_area_ids') })" />
+                    <FormItem :label="t('broadcastInfo.broadcast_number')" type="string" v-model="baTable.form.items!.broadcast_number" prop="broadcast_number" :placeholder="t('Please input field', { field: t('broadcastInfo.broadcast_number') })" />
                 </el-form>
             </div>
         </el-scrollbar>
@@ -66,9 +59,7 @@ const baTable = inject('baTable') as baTableClass
 
 const { t } = useI18n()
 
-const rules: Partial<Record<string, FormItemRule[]>> = reactive({
-    port: [buildValidatorData({ name: 'number', title: t('device.port') })],
-})
+const rules: Partial<Record<string, FormItemRule[]>> = reactive({})
 </script>
 
 <style scoped lang="scss"></style>

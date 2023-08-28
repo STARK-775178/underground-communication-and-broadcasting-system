@@ -13,7 +13,7 @@ class CallRecord extends Model
 
 
     // 使用默认连接
-    protected $connection = 'mysql2';
+    protected $connection = 'asteriskcdrdb';
     // 表名
     protected $name = 'cdr';
 
