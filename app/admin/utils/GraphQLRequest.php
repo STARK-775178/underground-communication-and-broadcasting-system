@@ -11,7 +11,7 @@ use app\admin\utils\ApiToken;
 
 class GraphQLRequest
 {
-    private $gqlUrl = 'http://192.168.1.4:80/admin/api/api/gql';
+    private $gqlUrl = 'http://192.168.203.8:80/admin/api/api/gql';
     private $token;
 
     public function __construct()

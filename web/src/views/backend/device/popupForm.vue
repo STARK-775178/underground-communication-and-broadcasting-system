@@ -13,7 +13,7 @@
             <div class="title" v-drag="['.ba-operate-dialog', '.el-dialog__header']" v-zoom="'.ba-operate-dialog'">
                 {{ baTable.form.operate ? t(baTable.form.operate) : '' }}
             </div>
-        </template>1
+        </template>
 
         <el-scrollbar v-loading="baTable.form.loading" class="ba-table-form-scrollbar">
             <div

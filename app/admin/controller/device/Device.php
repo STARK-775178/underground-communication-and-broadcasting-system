@@ -27,6 +27,8 @@ protected object $pagingGroupsModel;
 
 protected object $pagingConfigModel;
 
+protected object $AreaModel;
+
 protected string|array $defaultSortField = 'status,desc';
 
 protected array|string $preExcludeFields = ['id', 'status'];
@@ -41,6 +43,7 @@ protected string|array $quickSearchField = ['id'];
         $this->model = new \app\admin\model\device\Device;
         $this->pagingConfigModel = new \app\admin\model\broadcast\PagingConfig;
         $this->pagingGroupsModel = new \app\admin\model\broadcast\PagingGroups;
+        $this->areaModel = new \app\admin\model\device\Area;
     }
 
 
@@ -49,7 +52,25 @@ protected string|array $quickSearchField = ['id'];
      *   添加设备与freepbx交互测试
      */
     public function test(): void{
+        $testAreaId = 12;
+        $ext = 1001;
+        $pageGroupList = $this->pagingConfigModel->where('description', 'LIKE', '%'.$testAreaId.'%')
+            ->field('page_group')->select();
+        foreach ($pageGroupList as $pageGroup) {
 
+//            判断该page_groups中该号码是否存在分机
+            $exists = $this->pagingGroupsModel
+                ->where('page_number', $pageGroup->page_group)
+                ->where('ext', '')
+                ->find();
+            if($exists){
+//                进行替换
+                $this->pagingGroupsModel->update(['page_number'=>$pageGroup->page_group,'ext'=>$ext]);
+            }else{
+                $this->pagingGroupsModel->create(['page_number'=>$pageGroup->page_group,'ext'=>$ext]);
+            }
+
+        }
     }
 
 
@@ -62,6 +83,8 @@ protected string|array $quickSearchField = ['id'];
     {
         if ($this->request->isPost()) {
             $data = $this->request->post();
+
+
             if (!$data) {
                 $this->error(__('Parameter %s can not be empty', ['']));
             }
@@ -85,11 +108,37 @@ protected string|array $quickSearchField = ['id'];
                         $validate->check($data);
                     }
                 }
-                //            freepbx交互
+
                 $username = $data['user_name'];
 
+                //通过area查询areaid
+                $area = $this->areaModel->where('area', $data["work_area"])->find();
                 $deviceName = $data['device_name'];
-                //        与freepbx交互
+
+                //添加设备时与Freepbx 区域广播交互
+                $testAreaId = $area->id;
+
+                $pageGroupList = $this->pagingConfigModel->where('description', 'LIKE', '%'.$testAreaId.'%')
+                    ->field('page_group')->select();
+                foreach ($pageGroupList as $pageGroup) {
+
+//            判断该page_groups中该号码是否存在分机
+                    $exists = $this->pagingGroupsModel
+                        ->where('page_number', $pageGroup->page_group)
+                        ->where('ext', '')
+                        ->find();
+                    if($exists){
+//                进行替换
+                        $this->pagingGroupsModel->update(['page_number'=>$pageGroup->page_group,'ext'=>$username]);
+                    }else{
+                        $this->pagingGroupsModel->create(['page_number'=>$pageGroup->page_group,'ext'=>$username]);
+                    }
+
+                }
+
+
+
+                //        与freepbx设备交互
                 $query = 'mutation {
     addExtension(
         input: {
@@ -129,7 +178,7 @@ protected string|array $quickSearchField = ['id'];
     user {
       extPassword
     }
-    
+
     }
   }';
                 $gqlPwd = $gqlRequest->sendQuery($queryPwd);
