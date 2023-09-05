@@ -457,11 +457,6 @@ export default {
             //TODO 全体全体广播逻辑
             clearInterval()
         },
-
-        // 页头点击按钮
-        handleClick(tab, event) {
-            console.log(tab, event)
-        },
     },
 }
 </script>

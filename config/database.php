@@ -24,7 +24,7 @@ return [
             // 数据库类型
             'type'            => env('database.type', 'mysql'),
             // 服务器地址
-            'hostname'        => env('database.hostname', '127.0.0.1'),
+            'hostname'        => env('database.hostname', '47.111.89.220'),
             // 数据库名
             'database'        => env('database.database', 'underground_communication'),
             // 用户名
@@ -61,7 +61,7 @@ return [
             // 数据库类型
             'type'            => env('database2.type', 'mysql'),
             // 服务器地址
-            'hostname'        => env('database2.hostname', '192.168.1.4'),
+            'hostname'        => env('database2.hostname', '192.168.203.8'),
             // 数据库名
             'database'        => env('database2.database', 'asteriskcdrdb'),
             // 用户名
@@ -98,7 +98,7 @@ return [
             // 数据库类型
             'type'            => env('database3.type', 'mysql'),
             // 服务器地址
-            'hostname'        => env('database3.hostname', '192.168.1.4'),
+            'hostname'        => env('database3.hostname', '192.168.203.8'),
             // 数据库名
             'database'        => env('database3.database', 'asterisk'),
             // 用户名

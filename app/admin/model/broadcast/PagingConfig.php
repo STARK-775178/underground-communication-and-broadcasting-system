@@ -13,6 +13,7 @@ class PagingConfig extends Model
 {
     // 表名
     protected $name = 'paging_config';
+    protected $pk = 'page_group';
     // 使用asterisk数据库
     protected $connection = 'asterisk';
     // 自动写入时间戳字段

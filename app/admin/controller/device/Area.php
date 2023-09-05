@@ -10,13 +10,17 @@ use think\Db;
 class Area extends Backend
 {
 
-protected array $noNeedLogin = ['add', 'index','del'];
+protected array $noNeedLogin = ['add', 'index','del','test'];
     /**
      * Area模型对象
      * @var object
      * @phpstan-var \app\admin\model\device\Area
      */
     protected object $model;
+
+    protected object $pagingGroupsModel;
+
+    protected object $pagingConfigModel;
 
     protected array|string $preExcludeFields = ['id'];
 
@@ -26,67 +30,117 @@ protected array $noNeedLogin = ['add', 'index','del'];
     {
         parent::initialize();
         $this->model = new \app\admin\model\device\Area;
+        $this->pagingConfigModel = new \app\admin\model\broadcast\PagingConfig;
+        $this->pagingGroupsModel = new \app\admin\model\broadcast\PagingGroups;
     }
 
-//    /**
-//     * 添加
-//     */
-//    public function add(): void
-//    {
-//
-//
-//
-////        if ($this->request->isPost()) {
-//        $data = $this->request->post();
-//// 查询数据库获取所有的ID
-//        $result = $this->model->column('id');
-//
-//// 将查询结果存储在一个数组中
-//        $idArray = [];
-//        foreach ($result as $id) {
-//            $idArray[] = $id;
-//        }
-//
-//
-//// 打印数组内容
-//        print_r($idArray);
-//
-////            if (!$data) {
-////                $this->error(__('Parameter %s can not be empty', ['']));
-////            }
-////
-////            $data = $this->excludeFields($data);
-////            if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
-////                $data[$this->dataLimitField] = $this->auth->id;
-////            }
-////
-////            $result = false;
-////            $this->model->startTrans();
-////            try {
-////                // 模型验证
-////                if ($this->modelValidate) {
-////                    $validate = str_replace("\\model\\", "\\validate\\", get_class($this->model));
-////                    if (class_exists($validate)) {
-////                        $validate = new $validate;
-////                        if ($this->modelSceneValidate) $validate->scene('add');
-////                        $validate->check($data);
-////                    }
-////                }
-////                $result = $this->model->save($data);
-////                $this->model->commit();
-////            } catch (Throwable $e) {
-////                $this->model->rollback();
-////                $this->error($e->getMessage());
-////            }
-////            if ($result !== false) {
-////                $this->success(__('Added successfully'));
-////            } else {
-////                $this->error(__('No rows were added'));
-////            }
-////        }
-////
-////        $this->error(__('Parameter error'));
-//    }
+
+    /*
+     *   添加增加区域与freepbx进行交互
+     */
+    public function test(): void{
+        $testId = 12;
+        $pagingConfigList = [];
+        $pagingGroupsList = [];
+        $descriptionList = $this->
+            pagingConfigModel->
+            where('page_group', '>', 3000)->
+            field('description')->
+            select();
+
+//            单独一个号码添加PagingConfig
+        $newPagingConfig = ['description' => $testId];
+        $pagingConfigList[] = $newPagingConfig;
+        foreach ($descriptionList as $description) {
+//              与其他广播区域的组合
+//            pagingConfigList添加数据
+            $newPagingConfig = ['description' => $description['description'].",".$testId];
+            $pagingConfigList[] = $newPagingConfig;
+        }
+//      将所有的PagingConfig添加到数据库
+        $pagingConfigDataSet = $this->pagingConfigModel->saveAll($pagingConfigList);
+        // 遍历数据集对象，将自增的pagingConfig的主键们存入$pagingGroupsList
+        foreach ($pagingConfigDataSet as $pagingConfig) {
+//            $newPagingGroups = ['page_number' => $pagingConfig->page_group,'ext'=>''];
+//            $pagingGroupsList[] = $newPagingGroups;
+            $this->pagingGroupsModel->create([    'page_number'  =>  $pagingConfig->page_group]);
+        }
+
+    }
+
+    /**
+     * 添加
+     */
+    public function add(): void
+    {
+        if ($this->request->isPost()) {
+            $data = $this->request->post();
+            if (!$data) {
+                $this->error(__('Parameter %s can not be empty', ['']));
+            }
+
+            $data = $this->excludeFields($data);
+            if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
+                $data[$this->dataLimitField] = $this->auth->id;
+            }
+
+            $result = false;
+            $this->model->startTrans();
+            try {
+//                 模型验证
+                if ($this->modelValidate) {
+                    $validate = str_replace("\\model\\", "\\validate\\", get_class($this->model));
+                    if (class_exists($validate)) {
+                        $validate = new $validate;
+                        if ($this->modelSceneValidate) $validate->scene('add');
+                        $validate->check($data);
+                    }
+                }
+
+                $result = $this->model->save($data);
+//                与freepbx进行交互
+                $areaId = $this->model->id;
+                $pagingConfigList = [];
+                $descriptionList = $this->
+                pagingConfigModel->
+                where('page_group', '>', 3000)->
+                field('description')->
+                select();
+
+//            单独一个号码添加PagingConfig
+                $newPagingConfig = ['description' => $areaId];
+                $pagingConfigList[] = $newPagingConfig;
+                foreach ($descriptionList as $description) {
+//              与其他广播区域的组合
+//            pagingConfigList添加数据
+                    $newPagingConfig = ['description' => $description['description'].",".$areaId];
+                    $pagingConfigList[] = $newPagingConfig;
+                }
+//      将所有的PagingConfig添加到数据库
+                $pagingConfigDataSet = $this->pagingConfigModel->saveAll($pagingConfigList);
+                // 遍历数据集对象，将自增的pagingConfig的主键们存入$pagingGroupsList
+                foreach ($pagingConfigDataSet as $pagingConfig) {
+//            $newPagingGroups = ['page_number' => $pagingConfig->page_group,'ext'=>''];
+//            $pagingGroupsList[] = $newPagingGroups;
+                    $this->pagingGroupsModel->create([    'page_number'  =>  $pagingConfig->page_group]);
+                }
+
+
+                $this->model->commit();
+            } catch (Throwable $e) {
+                $this->model->rollback();
+                $this->error($e->getMessage());
+            }
+            if ($result !== false) {
+                $this->success(__('Added successfully'));
+            } else {
+                $this->error(__('No rows were added'));
+            }
+        }
+
+        $this->error(__('Parameter error'));
+
+    }
     /**
      * 若需重写查看、编辑、删除等方法，请复制 @see \app\admin\library\traits\Backend 中对应的方法至此进行重写
      */

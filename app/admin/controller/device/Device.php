@@ -25,6 +25,8 @@ protected object $model;
 
 protected object $pagingGroupsModel;
 
+protected object $pagingConfigModel;
+
 protected string|array $defaultSortField = 'status,desc';
 
 protected array|string $preExcludeFields = ['id', 'status'];
@@ -37,19 +39,17 @@ protected string|array $quickSearchField = ['id'];
     {
         parent::initialize();
         $this->model = new \app\admin\model\device\Device;
-
+        $this->pagingConfigModel = new \app\admin\model\broadcast\PagingConfig;
         $this->pagingGroupsModel = new \app\admin\model\broadcast\PagingGroups;
     }
 
 
 
     /*
-     *   添加广播组测试
+     *   添加设备与freepbx交互测试
      */
     public function test(): void{
-        $this->pagingGroupsModel->page_number = '3000';
-        $this->pagingGroupsModel->ext = '2001';
-        $this->pagingGroupsModel->save();
+
     }
 
 
@@ -198,7 +198,7 @@ protected string|array $quickSearchField = ['id'];
         $dataArr = $res->items();
         // 创建 PAMI 客户端实例
         $clientOptions = array(
-            'host' => '192.168.1.4',
+            'host' => '192.168.203.8',
             'port' => '5038',
             'username' => 'admin',
             'secret' => 'MeYFBp4ccXtT',

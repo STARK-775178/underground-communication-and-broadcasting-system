@@ -296,6 +296,13 @@ export default {
                 .then((response) => {
                     // 处理响应数据
                     console.log(response)
+                    this.callDialogVisible = true //开启呼叫的弹窗
+                    // 开启通话计时
+                    this.callStartTime = Date.now()
+                    setInterval(() => {
+                        const currentTime = Date.now()
+                        this.callDuration = Math.floor((currentTime - this.callStartTime) / 1000)
+                    }, 1000)
                 })
                 .catch((error) => {
                     // 处理错误
@@ -311,14 +318,7 @@ export default {
             // Handle confirmation logic
             console.log('Confirmed call for', this.selectedCard)
             this.dialogVisible = false // Hide the dialog after confirmation
-            this.callDialogVisible = true //开启呼叫的弹窗
             this.call(this.selectedCard.phone)
-            // 开启通话计时
-            this.callStartTime = Date.now()
-            setInterval(() => {
-                const currentTime = Date.now()
-                this.callDuration = Math.floor((currentTime - this.callStartTime) / 1000)
-            }, 1000)
         },
         cancelCall() {
             this.$message({
