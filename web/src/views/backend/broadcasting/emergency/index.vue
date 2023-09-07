@@ -196,8 +196,10 @@
 
 <script>
 import { deviceListApi, areaListApi } from '/@/api/backend/device/device'
-import { callApi, hangupApi, hangupAllApi } from '/@/api/backend/communication/call'
+import { callApi, hangupAllApi } from '/@/api/backend/communication/call'
 import { areaBroadcast } from '/@/api/backend/broadcast/areaBroadcast'
+import { addBroadcastRecord } from '/@/api/backend/broadcast/broadcastRecord'
+import moment from 'moment'
 export default {
     data() {
         return {
@@ -209,11 +211,26 @@ export default {
             areaList: [],
             selectedArea: '所有区域',
 
+            // 通话时长定时器
+            callStartTime: null,
+            callDuration: 0,
+
+            // 全体广播对话框
+            allBroadcastDialogVisible: false,
+            dialogBroadcastTitle: '',
             // 区域广播属性
             selectAreaDialogVisible: false,
             selectedAreas: [],
             selectedAreasId: [],
 
+            // 添加广播记录的数据
+            broadcast: {
+                broadcast_duration: 1,
+                broadcast_datetime:"2023-09-07 17:08:20",
+                broadcast_type: '',
+                caller: 'admin',
+                broadcast_areas: this.selectedAreasId,
+            },
             // broadcastAreas: [
             //     {
             //         id: 1,
@@ -248,14 +265,6 @@ export default {
             //         population: 30,
             //     },
             // ],
-
-            // 通话时长定时器
-            callStartTime: null,
-            callDuration: 0,
-
-            // 全体广播对话框
-            allBroadcastDialogVisible: false,
-            dialogBroadcastTitle: '',
         }
     },
     computed: {
@@ -338,6 +347,23 @@ export default {
         this.getAreaList()
     },
     methods: {
+        // 获取当前时间
+        getDateTime() {
+            return moment().format('YYYY-MM-DD HH:mm:ss')
+        },
+        // 增加广播记录
+        addBroadcast(broadcast) {
+            addBroadcastRecord(broadcast)
+                .then((response) => {
+                    // 处理响应数据
+                    console.error(response)
+                })
+                .catch((error) => {
+                    // 处理错误
+                    console.error(error)
+                })
+        },
+
         getAreaIdByName(areaName) {
             const area = this.areaList.find((area) => area.area === areaName)
             return area ? area.id : null
@@ -412,8 +438,13 @@ export default {
         },
         // 区域广播确定按钮
         openBroadcastDialog() {
+            // 区域广播记录信息
+            this.broadcast.broadcast_type = '区域广播'
+            this.broadcast.broadcast_duration = this.callDuration
+            this.broadcast.broadcast_datetime = this.getDateTime()
+            this.broadcast.broadcast_areas = this.selectedAreasId
+            // 设置对话框标题
             this.dialogBroadcastTitle = '正在进行区域广播'
-
             // 获取选择区域的id
             console.log(this.selectedAreasId)
             // 发起区域广播请求
@@ -442,6 +473,10 @@ export default {
             //     const currentTime = Date.now()
             //     this.callDuration = Math.floor((currentTime - this.callStartTime) / 1000)
             // }, 1000)
+            // 全体广播记录信息
+            this.broadcast.broadcast_type = '紧急广播'
+            this.broadcast.broadcast_datetime = this.getDateTime()
+            this.broadcast.broadcast_duration = this.callDuration;
             // 进行全体广播呼叫方法
             callApi('3000')
                 .then((response) => {
@@ -469,6 +504,7 @@ export default {
         },
         //结束紧急广播
         endEmergencyBroadcast() {
+            // 结束所有通话
             hangupAllApi()
                 .then((response) => {
                     console.log(response)
@@ -480,6 +516,16 @@ export default {
                     console.error(error)
                     this.allBroadcastDialogVisible = false
                     clearInterval()
+                })
+            // 添加广播记录
+            addBroadcastRecord(this.broadcast)
+                .then((response) => {
+                    // 处理响应数据
+                    console.error(response)
+                })
+                .catch((error) => {
+                    // 处理错误
+                    console.error(error)
                 })
         },
     },

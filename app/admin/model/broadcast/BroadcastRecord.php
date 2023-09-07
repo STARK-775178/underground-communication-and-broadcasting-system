@@ -17,18 +17,18 @@ class BroadcastRecord extends Model
 
     // 追加属性
     protected $append = [
-        'broadAreasTable',
+        'broadcastAreasTable',
     ];
 
 
-    public function getBroadAreasTableAttr($value, $row): array
+    public function getBroadcastAreasTableAttr($value, $row): array
     {
         return [
-            'area' => \app\admin\model\device\Area::whereIn('area', $row['broad_areas'])->column('area'),
+            'area' => \app\admin\model\device\Area::whereIn('id', $row['broadcast_areas'])->column('area'),
         ];
     }
 
-    public function getBroadAreasAttr($value): array
+    public function getBroadcastAreasAttr($value): array
     {
         if ($value === '' || $value === null) return [];
         if (!is_array($value)) {
@@ -37,7 +37,7 @@ class BroadcastRecord extends Model
         return $value;
     }
 
-    public function setBroadAreasAttr($value): string
+    public function setBroadcastAreasAttr($value): string
     {
         return is_array($value) ? implode(',', $value) : $value;
     }

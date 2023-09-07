@@ -33,7 +33,31 @@ protected array $noNeedLogin = ['add', 'index','del','test'];
         $this->pagingConfigModel = new \app\admin\model\broadcast\PagingConfig;
         $this->pagingGroupsModel = new \app\admin\model\broadcast\PagingGroups;
     }
+    /**
+     * 查看
+     * @throws Throwable
+     */
+    public function index(): void
+    {
+        if ($this->request->param('select')) {
+            $this->select();
+        }
 
+        list($where, $alias, $limit, $order) = $this->queryBuilder();
+        $res = $this->model
+            ->field($this->indexField)
+            ->withJoin($this->withJoinTable, $this->withJoinType)
+            ->alias($alias)
+            ->where('id','>','1')
+            ->order($order)
+            ->paginate($limit);
+
+        $this->success('', [
+            'list'   => $res->items(),
+            'total'  => $res->total(),
+            'remark' => get_route_remark(),
+        ]);
+    }
 
     /*
      *   添加增加区域与freepbx进行交互
