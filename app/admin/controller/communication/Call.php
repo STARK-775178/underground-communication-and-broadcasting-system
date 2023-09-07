@@ -3,19 +3,23 @@
 namespace app\admin\controller\communication;
 
 
-
+use think\Request;
 
 use PAMI\Client\Impl\ClientImpl as PamiClient;
 use PAMI\Message\Action\OriginateAction;
 use PAMI\Message\Action\HangupAction;
-use app\common\controller\Backend;
 use PAMI\Message\Action\CoreShowChannelsAction;
+use app\common\controller\Backend;
 use app\admin\utils\GraphQLRequest;
 
 class Call extends Backend
 {
 
 
+    public function initialize(): void
+    {
+        parent::initialize();
+    }
     // 无需登录的方法列表
     protected array $noNeedLogin = ['call','hangup','test'];
 
@@ -131,7 +135,46 @@ class Call extends Backend
 
     }
 
+    public function hangupAll(){
+        $options = [
+            'host' => '192.168.203.8',
+            'scheme' => 'tcp://',
+            'port' => 5038,
+            'username' => 'admin',
+            'secret' => 'MeYFBp4ccXtT',
+            'connect_timeout' => 20000,
+            'read_timeout' => 20000
+        ];
+        $pamiClient = new PamiClient($options);
+        // 尝试连接到Asterisk
+        try {
+            $pamiClient->open();
+        } catch (\Exception $connectException) {
+            // 处理连接失败异常
+            // 例如：日志记录、通知用户等
+            $this->error('', [
+                'success' => false,
+                'message' => '连接Asterisk失败：' . $connectException->getMessage(),
+                'data' => null
+            ]);
+            return;
+        }
+        $coreShowChannelsAction = new CoreShowChannelsAction();
+        $response = $pamiClient->send($coreShowChannelsAction);
 
+        $channels = $response->getEvents();
+
+
+        // 挂断每个通道
+        foreach ($channels as $channel) {
+            $channelId = $channel->getKey('channel');
+            $hangupAction = new HangupAction($channelId);
+            $pamiClient->send($hangupAction);
+        }
+        // 关闭PAMI客户端
+        $this->success('挂断成功');
+        $pamiClient->close();
+    }
     public function hangup($extension){
 //        $client = new PJSIPClient();
 //        $client->hangupByExtension($extension);

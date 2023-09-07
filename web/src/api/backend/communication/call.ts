@@ -13,3 +13,11 @@ export function hangupApi(extension: string) {
         method: 'get',
     })
 }
+
+export function hangupAllApi(data: anyObj) {
+    return createAxios({
+        url: '/admin/communication.Call/hangupAll',
+        method: 'get',
+        data: data,
+    })
+}

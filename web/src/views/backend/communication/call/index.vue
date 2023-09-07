@@ -45,7 +45,7 @@
                                     </el-tag>
                                 </div>
                                 <div class="centered-image">
-                                    <img style="width: 50%; height: 50%; margin-top: 0px" src="src\assets\horn.png" />
+                                    <img style="width: 50%; height: 50%; margin-top: 0px" src="~assets/horn.png" />
                                 </div>
 
                                 <div>
@@ -99,7 +99,7 @@
                     >
                         <div class="dialog-content">
                             <div class="centered-image">
-                                <img style="width: 100%; height: 100%" src="src\assets\call.png" />
+                                <img style="width: 100%; height: 100%" src="~assets/call.png" />
                             </div>
                             <div class="dialog-row">
                                 <el-col>

@@ -45,7 +45,7 @@
                                     </el-tag>
                                 </div>
                                 <div class="centered-image">
-                                    <img style="width: 50%; height: 50%; margin-top: 0px" src="src\assets\horn.png" />
+                                    <img style="width: 50%; height: 50%; margin-top: 0px" src="~assets/horn.png" />
                                 </div>
 
                                 <div>
@@ -131,7 +131,7 @@
                     >
                         <div class="dialog-content">
                             <div class="centered-image">
-                                <img style="width: 100%; height: 100%; margin-top: 0" src="src\assets\call.png" />
+                                <img style="width: 100%; height: 100%; margin-top: 0" src="~assets/call.png" />
                             </div>
                         </div>
                         <div style="justify-content: center; align-items: center; text-align: center" class="dialog-row">
@@ -196,7 +196,8 @@
 
 <script>
 import { deviceListApi, areaListApi } from '/@/api/backend/device/device'
-import { callApi, hangupApi } from '/@/api/backend/communication/call'
+import { callApi, hangupApi, hangupAllApi } from '/@/api/backend/communication/call'
+import { areaBroadcast } from '/@/api/backend/broadcast/areaBroadcast'
 export default {
     data() {
         return {
@@ -413,8 +414,16 @@ export default {
         openBroadcastDialog() {
             this.dialogBroadcastTitle = '正在进行区域广播'
 
-            this.selectAreaDialogVisible = false
-            this.allBroadcastDialogVisible = true
+            // 获取选择区域的id
+            console.log(this.selectedAreasId)
+            // 发起区域广播请求
+            areaBroadcast(this.selectedAreasId)
+                .then((response) => {
+                    this.selectAreaDialogVisible = false
+                    this.allBroadcastDialogVisible = true
+                    // console.log(response)
+                })
+                .catch((error) => {})
             // 开启广播时间计时
             this.callStartTime = Date.now()
             setInterval(() => {
@@ -424,7 +433,15 @@ export default {
         },
         // 全体广播按钮
         emergencyBroadcast() {
-            //TODO 全体广播逻辑
+            // this.dialogBroadcastTitle = '正在进行全体紧急广播'
+            // this.selectedAreasId = this.broadcastAreas.map((area) => area.id)
+            // this.allBroadcastDialogVisible = true
+            // // 开启广播时间计时
+            // this.callStartTime = Date.now()
+            // setInterval(() => {
+            //     const currentTime = Date.now()
+            //     this.callDuration = Math.floor((currentTime - this.callStartTime) / 1000)
+            // }, 1000)
             // 进行全体广播呼叫方法
             callApi('3000')
                 .then((response) => {
@@ -449,13 +466,21 @@ export default {
         selectBroadcast() {
             this.selectedAreasId = []
             this.selectAreaDialogVisible = true
-            //TODO 区域广播逻辑逻辑
         },
         //结束紧急广播
         endEmergencyBroadcast() {
-            this.allBroadcastDialogVisible = false
-            //TODO 全体全体广播逻辑
-            clearInterval()
+            hangupAllApi()
+                .then((response) => {
+                    console.log(response)
+                    this.allBroadcastDialogVisible = false
+                    clearInterval()
+                })
+                .catch((error) => {
+                    // 处理错误
+                    console.error(error)
+                    this.allBroadcastDialogVisible = false
+                    clearInterval()
+                })
         },
     },
 }

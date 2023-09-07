@@ -234,11 +234,12 @@ protected string|array $quickSearchField = ['id'];
          * 2. 以下的别名设置了主表别名，同时便于拼接查询参数等
          * 3. paginate 数据集可使用链式操作 each(function($item, $key) {}) 遍历处理
          */
+        $where =
         list($where, $alias, $limit, $order) = $this->queryBuilder();
         $res = $this->model
             ->withJoin($this->withJoinTable, $this->withJoinType)
             ->alias($alias)
-            ->where($where)
+            ->where('area', '<>', '广播室')
             ->order($order)
             ->paginate($limit);
         $res->visible(['workAreaTable' => ['string']]);
