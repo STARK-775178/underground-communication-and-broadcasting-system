@@ -8,6 +8,7 @@ export default {
     phone: 'phone',
     device_name: 'device_name',
     work_area: 'work_area',
+    workareatable__area: 'area',
     status: 'status',
     'status 0': 'status 0',
     'status 1': 'status 1',

@@ -14,7 +14,6 @@
                 {{ baTable.form.operate ? t(baTable.form.operate) : '' }}
             </div>
         </template>
-
         <el-scrollbar v-loading="baTable.form.loading" class="ba-table-form-scrollbar">
             <div
                 class="ba-operate-form"
@@ -38,7 +37,7 @@
                     <FormItem :label="t('device.port')" type="number" prop="port" :input-attr="{ step: 1 }" v-model.number="baTable.form.items!.port" :placeholder="t('Please input field', { field: t('device.port') })" />
                     <FormItem :label="t('device.phone')" type="string" v-model="baTable.form.items!.phone" prop="phone" :placeholder="t('Please input field', { field: t('device.phone') })" />
                     <FormItem :label="t('device.device_name')" type="string" v-model="baTable.form.items!.device_name" prop="device_name" :placeholder="t('Please input field', { field: t('device.device_name') })" />
-                    <FormItem :label="t('device.work_area')" type="remoteSelect" v-model="baTable.form.items!.work_area" prop="work_area" :input-attr="{ pk: 'cbroad_area.area', field: 'area', 'remote-url': '/admin/device.Area/index' }" :placeholder="t('Please select field', { field: t('device.work_area') })" />
+                    <FormItem :label="t('device.work_area')" type="remoteSelect" v-model="baTable.form.items!.work_area" prop="work_area" :input-attr="{ pk: 'cbroadcast_area.area', field: 'area', 'remote-url': '/admin/device.Area/index' }" :placeholder="t('Please select field', { field: t('device.work_area') })" />
                 </el-form>
             </div>
         </el-scrollbar>

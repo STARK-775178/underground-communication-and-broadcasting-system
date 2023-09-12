@@ -3,28 +3,28 @@
 namespace app\admin\controller\device;
 
 use app\common\controller\Backend;
-use think\Db;
+
 /**
  * 广播区域
  */
 class Area extends Backend
 {
 
-    protected array $noNeedLogin = ['add', 'index','del','test'];
+protected array $noNeedLogin = ['add', 'index','del','test'];
     /**
      * Area模型对象
      * @var object
      * @phpstan-var \app\admin\model\device\Area
      */
-    protected object $model;
+protected object $model;
 
-    protected object $pagingGroupsModel;
+protected object $pagingGroupsModel;
 
-    protected object $pagingConfigModel;
+protected object $pagingConfigModel;
 
-    protected array|string $preExcludeFields = ['id'];
+protected array|string $preExcludeFields = ['id'];
 
-    protected string|array $quickSearchField = ['id'];
+protected string|array $quickSearchField = ['id'];
 
     public function initialize(): void
     {
@@ -67,26 +67,26 @@ class Area extends Backend
         $pagingConfigList = [];
         $pagingGroupsList = [];
         $descriptionList = $this->
-            pagingConfigModel->
-            where('page_group', '>', 3000)->
-            field('description')->
-            select();
+        pagingConfigModel->
+        where('page_group', '>', 3000)->
+        field('description')->
+        select();
 
-//            单独一个号码添加PagingConfig
+        //            单独一个号码添加PagingConfig
         $newPagingConfig = ['description' => $testId];
         $pagingConfigList[] = $newPagingConfig;
         foreach ($descriptionList as $description) {
-//              与其他广播区域的组合
-//            pagingConfigList添加数据
+            //              与其他广播区域的组合
+            //            pagingConfigList添加数据
             $newPagingConfig = ['description' => $description['description'].",".$testId];
             $pagingConfigList[] = $newPagingConfig;
         }
-//      将所有的PagingConfig添加到数据库
+        //      将所有的PagingConfig添加到数据库
         $pagingConfigDataSet = $this->pagingConfigModel->saveAll($pagingConfigList);
         // 遍历数据集对象，将自增的pagingConfig的主键们存入$pagingGroupsList
         foreach ($pagingConfigDataSet as $pagingConfig) {
-//            $newPagingGroups = ['page_number' => $pagingConfig->page_group,'ext'=>''];
-//            $pagingGroupsList[] = $newPagingGroups;
+            //            $newPagingGroups = ['page_number' => $pagingConfig->page_group,'ext'=>''];
+            //            $pagingGroupsList[] = $newPagingGroups;
             $this->pagingGroupsModel->create([    'page_number'  =>  $pagingConfig->page_group]);
         }
 
@@ -111,7 +111,7 @@ class Area extends Backend
             $result = false;
             $this->model->startTrans();
             try {
-//                 模型验证
+                //                 模型验证
                 if ($this->modelValidate) {
                     $validate = str_replace("\\model\\", "\\validate\\", get_class($this->model));
                     if (class_exists($validate)) {
@@ -122,7 +122,7 @@ class Area extends Backend
                 }
 
                 $result = $this->model->save($data);
-//                与freepbx进行交互
+                //                与freepbx进行交互
                 $areaId = $this->model->id;
                 $pagingConfigList = [];
                 $descriptionList = $this->
@@ -131,22 +131,22 @@ class Area extends Backend
                 field('description')->
                 select();
 
-//            单独一个号码添加PagingConfig
+                //            单独一个号码添加PagingConfig
                 $newPagingConfig = ['description' => $areaId];
                 $pagingConfigList[] = $newPagingConfig;
                 foreach ($descriptionList as $description) {
-//              与其他广播区域的组合
-//            pagingConfigList添加数据
+                    //              与其他广播区域的组合
+                    //            pagingConfigList添加数据
                     $newPagingConfig = ['description' => $description['description'].",".$areaId];
                     $pagingConfigList[] = $newPagingConfig;
                 }
-//      将所有的PagingConfig添加到数据库
+                //      将所有的PagingConfig添加到数据库
                 $pagingConfigDataSet = $this->pagingConfigModel->saveAll($pagingConfigList);
                 // 遍历数据集对象，将自增的pagingConfig的主键们存入$pagingGroupsList
                 foreach ($pagingConfigDataSet as $pagingConfig) {
-//            $newPagingGroups = ['page_number' => $pagingConfig->page_group,'ext'=>''];
-//            $pagingGroupsList[] = $newPagingGroups;
-                    $this->pagingGroupsModel->create([    'page_number'  =>  $pagingConfig->page_group]);
+                    //            $newPagingGroups = ['page_number' => $pagingConfig->page_group,'ext'=>''];
+                    //            $pagingGroupsList[] = $newPagingGroups;
+                    $this->pagingGroupsModel->create(['page_number'  =>  $pagingConfig->page_group]);
                 }
 
 

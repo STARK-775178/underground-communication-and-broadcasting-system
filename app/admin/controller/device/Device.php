@@ -49,28 +49,30 @@ protected string|array $quickSearchField = ['id'];
 
 
     /*
-     *   添加设备与freepbx交互测试
+     *   删除设备设备与freepbx交互测试
      */
     public function test(): void{
-        $testAreaId = 12;
-        $ext = 1001;
-        $pageGroupList = $this->pagingConfigModel->where('description', 'LIKE', '%'.$testAreaId.'%')
-            ->field('page_group')->select();
-        foreach ($pageGroupList as $pageGroup) {
+        $testDeviceId = 23;
+//        根据设备id查询设备号码
+        $device = $this->model->where('id',$testDeviceId)->find();
 
-//            判断该page_groups中该号码是否存在分机
-            $exists = $this->pagingGroupsModel
-                ->where('page_number', $pageGroup->page_group)
-                ->where('ext', '')
-                ->find();
-            if($exists){
-//                进行替换
-                $this->pagingGroupsModel->update(['page_number'=>$pageGroup->page_group,'ext'=>$ext]);
-            }else{
-                $this->pagingGroupsModel->create(['page_number'=>$pageGroup->page_group,'ext'=>$ext]);
+//        查询到所有与该设备关联的广播区域信息
+        $pageGroups = $this->pagingGroupsModel
+            ->where('ext', $device->user_name)->select();
+
+        //若$pageGroupCount == 1时，删除该$pageGroup时添加一条（$pageGroup->page_number,''）信息
+        foreach ($pageGroups as $pageGroup){
+//            获取该广播号码的设备数量
+            $pageGroupCount = $this->pagingGroupsModel
+                ->where('page_number', $pageGroup->page_number)
+                ->count();
+            echo $pageGroupCount;
+            if($pageGroupCount == 1){
+//                $this->pagingGroupsModel->create(['page_number'=>$pageGroup->page_number]);
             }
-
+            $pageGroup->where('ext', $device->user_name)->delete();
         }
+
     }
 
 
@@ -122,13 +124,13 @@ protected string|array $quickSearchField = ['id'];
                     ->field('page_group')->select();
                 foreach ($pageGroupList as $pageGroup) {
 
-//            判断该page_groups中该号码是否存在分机
+                    //            判断该page_groups中该号码是否存在分机
                     $exists = $this->pagingGroupsModel
                         ->where('page_number', $pageGroup->page_group)
                         ->where('ext', '')
                         ->find();
                     if($exists){
-//                进行替换
+                        //                进行替换
                         $this->pagingGroupsModel->update(['page_number'=>$pageGroup->page_group,'ext'=>$username]);
                     }else{
                         $this->pagingGroupsModel->create(['page_number'=>$pageGroup->page_group,'ext'=>$username]);
@@ -187,19 +189,19 @@ protected string|array $quickSearchField = ['id'];
                 $password = $gqlPwd['data']['fetchExtension']['user']['extPassword'];
                 $data['password'] = $password;
 
-//                freepbx asterisk数据库
+                //                freepbx asterisk数据库
                 $this->pagingGroupsModel->page_number = '3000';
                 $this->pagingGroupsModel->ext =$username;
                 $this->pagingGroupsModel->save();
 
-//                数据库部分
+                //                数据库部分
                 $result = $this->model->save($data);
                 $this->model->commit();
 
 
 
 
-                        } catch (Throwable $e) {
+            } catch (Throwable $e) {
                 $this->model->rollback();
                 $this->error($e->getMessage());
             }
@@ -275,7 +277,7 @@ protected string|array $quickSearchField = ['id'];
             try {
                 // 发送 Action 请求到 Asterisk 服务器
                 $response = $client->send($action);
-//                var_dump($response);
+                //                var_dump($response);
                 if ($response->isSuccess()) {
                     // 获取状态信息
                     $status = $response->getKeys()['status'];
@@ -299,10 +301,10 @@ protected string|array $quickSearchField = ['id'];
         // 更新后的带有修改后状态的数据
         $updatedData = $dataArr;
 
-// 从数组中提取status列作为排序依据
+        // 从数组中提取status列作为排序依据
         $statusArray = array_column($updatedData, 'status');
 
-// 使用array_multisort()函数排序
+        // 使用array_multisort()函数排序
         array_multisort($statusArray, SORT_DESC, $updatedData);
 
         $this->success('设备清单查询成功', [
@@ -342,14 +344,39 @@ protected string|array $quickSearchField = ['id'];
         foreach ($filteredData as &$item) {
             $extensionID = $item['user_name'];
 
-            $queryDelExt = 'mutation {
-    deleteExtension(
-        input: { extensionId: '.$extensionID.' }
-    ) {
-        status
-        message
-    }
-}';
+//            与page_group表进行交互，完成区域交互
+
+            //        查询到所有与该设备关联的广播区域信息
+            $pageGroups = $this->pagingGroupsModel
+                ->where('ext', $extensionID)->select();
+
+
+            foreach ($pageGroups as $pageGroup){
+                $pageGroupCount = $this->pagingGroupsModel
+                    ->where('page_number', $pageGroup->page_number)
+                    ->count();
+                //若$pageGroupCount == 1时，删除该$pageGroup时添加一条（$pageGroup->page_number,''）信息
+                if($pageGroupCount == 1){
+                    $this->pagingGroupsModel->create(['page_number'=>$pageGroup->page_number]);
+                }
+            }
+
+            foreach ($pageGroups as $pageGroup){
+                //            获取该广播号码的设备数量
+//                删除pageGroup信息
+                $pageGroup->where('ext', $extensionID)->delete();
+            }
+
+
+//            与Freepbx删除分机api交互
+                    $queryDelExt = 'mutation {
+            deleteExtension(
+                input: { extensionId: '.$extensionID.' }
+            ) {
+                status
+                message
+            }
+        }';
             $gqlRequest = new GraphQLRequest();
             $gqlResult = $gqlRequest->sendQuery($queryDelExt);
         }
@@ -359,15 +386,15 @@ protected string|array $quickSearchField = ['id'];
             $this->error(__('Parameter error'));
         }
 
-        //        与freepbx交互
-        $query = 'mutation {
-        deleteExtension(
-            input: { extensionId:  }
-    ) {
-            status
-        message
-    }
-}';
+                //        与freepbx交互
+                $query = 'mutation {
+                deleteExtension(
+                    input: { extensionId:  }
+            ) {
+                    status
+                message
+            }
+        }';
 
 
         $gqlRequest = new GraphQLRequest();

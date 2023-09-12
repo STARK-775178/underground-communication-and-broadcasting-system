@@ -8,6 +8,7 @@ export default {
     phone: '设备电话号码',
     device_name: '设备名称',
     work_area: '作业区域',
+    workareatable__area: '区域名称',
     status: '状态',
     'status 0': '离线',
     'status 1': '在线',
