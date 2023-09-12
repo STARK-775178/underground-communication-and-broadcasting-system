@@ -49,7 +49,7 @@ const baTable = new baTableClass(
             { label: t('broadcasting.record.id'), prop: 'id', align: 'center', width: 70, operator: 'RANGE', sortable: 'custom' },
             { label: t('broadcasting.record.broadcast_type'), prop: 'broadcast_type', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false },
             { label: t('broadcasting.record.caller'), prop: 'caller', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false },
-            { label: t('broadcasting.record.broadcast_duration'), prop: 'broadcast_duration', align: 'center', operator: 'eq', sortable: 'custom' },
+            { label: t('broadcasting.record.broadcast_duration'), prop: 'broadcast_duration', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false },
             { label: t('broadcasting.record.broadcastareastable__area'), prop: 'broadcastAreasTable.area', align: 'center', render: 'tags', operator: false },
             { label: t('broadcasting.record.broadcastareastable__area'), prop: 'broadcast_areas', align: 'center', operator: 'FIND_IN_SET', show: false, comSearchRender: 'remoteSelect', remote: { pk: 'cbroad_area.id', field: 'area', remoteUrl: '/admin/device.Area/index', multiple: true } },
             { label: t('broadcasting.record.broadcast_datetime'), prop: 'broadcast_datetime', align: 'center', operator: 'eq', sortable: 'custom', width: 160 },
@@ -58,7 +58,7 @@ const baTable = new baTableClass(
         dblClickNotEditColumn: [undefined],
     },
     {
-        defaultItems: { broadcast_duration: 0, broadcast_datetime: null },
+        defaultItems: { broadcast_datetime: null },
     }
 )
 

@@ -33,13 +33,13 @@ class BroadcastRecord extends Backend
     {
         if ($this->request->isPost()) {
             $data = $this->request->post();
-//            区域广播
+            //            区域广播
             if($data['broadcast_type'] === '区域广播'){
                 $broadcast_areas = $data['broadcast_areas'];
                 sort($broadcast_areas);
                 $data['broadcast_areas'] = $broadcast_areas;
             }
-//            紧急广播
+            //            紧急广播
             if($data['broadcast_type'] === '紧急广播'){
                 $data['broadcast_areas'] = [1];
             }
@@ -79,7 +79,6 @@ class BroadcastRecord extends Backend
 
         $this->error(__('Parameter error'));
     }
-
     /**
      * 若需重写查看、编辑、删除等方法，请复制 @see \app\admin\library\traits\Backend 中对应的方法至此进行重写
      */

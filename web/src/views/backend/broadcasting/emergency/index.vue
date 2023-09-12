@@ -89,7 +89,7 @@
                             <el-scrollbar class="scrollable-container" style="width: 80%">
                                 <div v-for="(area, index) in broadcastAreas" :key="index" class="area-info">
                                     <div class="inline-info">
-                                        <el-checkbox v-model="selectedAreasId" :label="area.id">{{ area.name }}</el-checkbox>
+                                        <el-checkbox :disabled="area.online===0" v-model="selectedAreasId" :label="area.id">{{ area.name }}</el-checkbox>
                                         <p>
                                             音箱数量：<span class="info-number">{{ area.speakers }}</span>
                                         </p>
@@ -225,8 +225,8 @@ export default {
 
             // 添加广播记录的数据
             broadcast: {
-                broadcast_duration: 1,
-                broadcast_datetime:"2023-09-07 17:08:20",
+                broadcast_duration: null,
+                broadcast_datetime: '2023-09-07 17:08:20',
                 broadcast_type: '',
                 caller: 'admin',
                 broadcast_areas: this.selectedAreasId,
@@ -267,6 +267,7 @@ export default {
             // ],
         }
     },
+
     computed: {
         broadcastAreas() {
             const areaMap = new Map()
@@ -339,6 +340,14 @@ export default {
 
             return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`
         },
+    },
+    watch: {
+        broadcast_duration_watch() {
+            this.durationFormat
+        },
+    },
+    created() {
+        this.broadcast.broadcast_duration = this.formatDuration
     },
     mounted() {
         // 获取设备清单
@@ -440,7 +449,7 @@ export default {
         openBroadcastDialog() {
             // 区域广播记录信息
             this.broadcast.broadcast_type = '区域广播'
-            this.broadcast.broadcast_duration = this.callDuration
+            // this.broadcast.broadcast_duration = this.formatDuration
             this.broadcast.broadcast_datetime = this.getDateTime()
             this.broadcast.broadcast_areas = this.selectedAreasId
             // 设置对话框标题
@@ -476,7 +485,7 @@ export default {
             // 全体广播记录信息
             this.broadcast.broadcast_type = '紧急广播'
             this.broadcast.broadcast_datetime = this.getDateTime()
-            this.broadcast.broadcast_duration = this.callDuration;
+            // this.broadcast.broadcast_duration = this.formatDuration
             // 进行全体广播呼叫方法
             callApi('3000')
                 .then((response) => {
@@ -517,8 +526,16 @@ export default {
                     this.allBroadcastDialogVisible = false
                     clearInterval()
                 })
+
+            let data = {
+                broadcast_duration : this.formatDuration,
+                broadcast_datetime : this.broadcast.broadcast_datetime,
+                broadcast_type : this.broadcast.broadcast_type,
+                caller : this.broadcast.caller,
+                broadcast_areas : this.broadcast.broadcast_areas,
+            }
             // 添加广播记录
-            addBroadcastRecord(this.broadcast)
+            addBroadcastRecord(data)
                 .then((response) => {
                     // 处理响应数据
                     console.error(response)

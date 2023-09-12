@@ -10,7 +10,7 @@ use think\Db;
 class Area extends Backend
 {
 
-protected array $noNeedLogin = ['add', 'index','del','test'];
+    protected array $noNeedLogin = ['add', 'index','del','test'];
     /**
      * Area模型对象
      * @var object
@@ -164,6 +164,45 @@ protected array $noNeedLogin = ['add', 'index','del','test'];
 
         $this->error(__('Parameter error'));
 
+    }
+    /**
+     * author fengyuzhuo
+     * 删除
+     * @param array $ids
+     * @throws Throwable
+     */
+    public function del(array $ids = []): void
+    {
+        if (!$this->request->isDelete() || !$ids) {
+            $this->error(__('Parameter error'));
+        }
+
+        $where             = [];
+        $dataLimitAdminIds = $this->getDataLimitAdminIds();
+        if ($dataLimitAdminIds) {
+            $where[] = [$this->dataLimitField, 'in', $dataLimitAdminIds];
+        }
+
+        $pk      = $this->model->getPk();
+        $where[] = [$pk, 'in', $ids];
+
+        $count = 0;
+        $data  = $this->model->where($where)->select();
+        $this->model->startTrans();
+        try {
+            foreach ($data as $v) {
+                $count += $v->delete();
+            }
+            $this->model->commit();
+        } catch (Throwable $e) {
+            $this->model->rollback();
+            $this->error($e->getMessage());
+        }
+        if ($count) {
+            $this->success(__('Deleted successfully'));
+        } else {
+            $this->error(__('No rows were deleted'));
+        }
     }
     /**
      * 若需重写查看、编辑、删除等方法，请复制 @see \app\admin\library\traits\Backend 中对应的方法至此进行重写

@@ -42,6 +42,7 @@ class CallRecord extends Backend
             ->withJoin($this->withJoinTable, $this->withJoinType)
             ->alias($alias)
             ->where('lastapp','Dial')
+            ->whereNotLike('dst', '%PAGE%')
             ->order($order)
             ->paginate($limit);
 
