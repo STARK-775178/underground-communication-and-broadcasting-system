@@ -10,7 +10,7 @@ use app\common\controller\Backend;
 class Area extends Backend
 {
 
-protected array $noNeedLogin = ['add', 'index','del','test'];
+protected array $noNeedLogin = ['add', 'index','del','test','testDel'];
     /**
      * Area模型对象
      * @var object
@@ -33,6 +33,48 @@ protected string|array $quickSearchField = ['id'];
         $this->pagingConfigModel = new \app\admin\model\broadcast\PagingConfig;
         $this->pagingGroupsModel = new \app\admin\model\broadcast\PagingGroups;
     }
+    /*
+  *   添加增加区域与freepbx进行交互
+  */
+    public function testDel(): void{
+        $v = 9;
+        //删除与page_config交互
+
+        //                获取所有与此区域相关的page_config
+        $pagingConfigs = $this->pagingConfigModel
+            ->where('description','like','%'.$v."%")
+            ->select();
+        //                 获取只包含此区域的page_config
+        $areaPagingConfig = $this->pagingConfigModel
+            ->where('description',$v)
+            ->find();
+        echo $areaPagingConfig;
+        //                判断此区域是否存在设备
+        $deviceCount = $this->pagingGroupsModel
+            ->where('page_number',$areaPagingConfig->page_group)
+            ->where('ext','<>','')
+            ->count();
+        if($deviceCount>0){
+            $this->success(__('区域内还存在设备,请先删除相关设备'));
+        }
+
+
+        // 该区域内不存在设备
+        foreach ($pagingConfigs as $pagingConfig){
+            //        该区域内不存在设备
+            //            删除处理paging_group表的相关信息
+//            $this->pagingGroupsModel
+//                ->where('page_number',$pagingConfig->page_group)
+//                ->delete();
+            //            删除pagingConfig
+//            $pagingConfig->delete();
+        }
+        }
+
+
+
+
+
     /**
      * 查看
      * @throws Throwable
@@ -166,13 +208,14 @@ protected string|array $quickSearchField = ['id'];
 
     }
     /**
-     * author fengyuzhuo
+     * author 冯钰卓
      * 删除
      * @param array $ids
      * @throws Throwable
      */
     public function del(array $ids = []): void
     {
+
         if (!$this->request->isDelete() || !$ids) {
             $this->error(__('Parameter error'));
         }
@@ -191,6 +234,39 @@ protected string|array $quickSearchField = ['id'];
         $this->model->startTrans();
         try {
             foreach ($data as $v) {
+
+                //删除与page_config交互
+
+//                获取所有与此区域相关的page_config
+                $pagingConfigs = $this->pagingConfigModel
+                    ->where('description','like','%'.$v->id."%")
+                    ->select();
+//                 获取只包含此区域的page_config
+                $areaPagingConfig = $this->pagingConfigModel
+                    ->where('description',$v->id)
+                    ->find();
+//                echo $areaPagingConfig;
+//                判断此区域是否存在设备
+                $deviceCount = $this->pagingGroupsModel
+                    ->where('page_number',$areaPagingConfig->page_group)
+                    ->where('ext','<>','')
+                    ->count();
+                if($deviceCount>0){
+                    $this->success(__('区域内还存在设备,请先删除相关设备'));
+                }
+
+
+                // 该区域内不存在设备
+                foreach ($pagingConfigs as $pagingConfig){
+                    //        该区域内不存在设备
+                    //            删除处理paging_group表的相关信息
+                    $this->pagingGroupsModel
+                        ->where('page_number',$pagingConfig->page_group)
+                        ->delete();
+                    //            删除pagingConfig
+                    $pagingConfig->delete();
+                }
+
                 $count += $v->delete();
             }
             $this->model->commit();
