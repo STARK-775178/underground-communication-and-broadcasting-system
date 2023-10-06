@@ -10,7 +10,8 @@ use PAMI\Message\Action\OriginateAction;
 use PAMI\Message\Action\HangupAction;
 use PAMI\Message\Action\CoreShowChannelsAction;
 use app\common\controller\Backend;
-use app\admin\utils\GraphQLRequest;
+use PAMI\Message\Event\CoreShowChannelEvent;
+use PAMI\Message\Action\CommandAction;
 
 class Call extends Backend
 {
@@ -20,46 +21,88 @@ class Call extends Backend
     {
         parent::initialize();
     }
+
     // 无需登录的方法列表
-    protected array $noNeedLogin = ['call','hangup','test'];
+    protected array $noNeedLogin = ['call', 'hangup', 'test'];
 
-    public function test(){
+    public function test()
+    {
+        $options = array(
+            'host' => '192.168.203.8',
+            'scheme' => 'tcp://',
+            'port' => 5038,
+            'username' => 'admin',
+            'secret' => 'MeYFBp4ccXtT',
+            'connect_timeout' => 20000,
+            'read_timeout' => 20000
+        );
 
-        $query = 'query{
+        $client = new PamiClient($options);
 
-    fetchAllExtensions {
-        status
-        message
-        totalCount
-        extension {
-            id
-            extensionId
-            user {
-              name
-              password
-              outboundCid
-              ringtimer
-              noanswer
-              sipname
-              password
-              extPassword
-            }
-              coreDevice {
-              deviceId
-              dial
-              devicetype
-              description
-              emergencyCid
-            }
+        // 尝试连接到Asterisk
+        try {
+            $client->open();
+        } catch (\Exception $connectException) {
+            // 处理连接失败异常
+            // 例如：日志记录、通知用户等
+            $this->error('', [
+                'success' => false,
+                'message' => '连接Asterisk失败：' . $connectException->getMessage(),
+                'data' => null
+            ]);
+            return;
         }
-    }
 
-}';
-    $gqlRequest = new GraphQLRequest();
 
-    $result = $gqlRequest->sendQuery($query);
+        try {
+            $client->open();
+            $channelArray = array(); // 创建一个空数组用于存储数据
 
-    var_dump($result);
+            // 使用 CoreShowChannelsAction 获取所有通话的信息
+            $coreShowChannelsAction = new CoreShowChannelsAction();
+            $response = $client->send($coreShowChannelsAction);
+
+            // 解析事件并获取通道信息
+            foreach ($response->getEvents() as $event) {
+                if ($event instanceof CoreShowChannelEvent) {
+                    $callerId = $event->getCallerIDNum();
+                    $createdDate = $event->getCreatedDate();
+                    $duration = $event->getDuration();
+                    $data = $event->getApplicationData();
+
+                    // 使用正则表达式匹配并提取被呼叫方信息
+                    preg_match('/PJSIP\/\d+\/sip:(.+?)@/', $data, $calleeMatch);
+                    $calleeNumber = isset($calleeMatch[1]) ? $calleeMatch[1] : 'Unknown';
+
+                    // 将信息存储到关联数组中
+                    $data = array(
+                        'callerId' => $callerId,
+                        'createdDate' => $createdDate,
+                        'duration' => $duration,
+                        'extension' => $calleeNumber
+                    );
+
+                    // 如果 calleeNumber 为 "Unknown"，跳过当前循环
+                    if ($calleeNumber === 'Unknown') {
+                        continue;
+                    }
+
+                    // 将关联数组添加到数据数组中
+                    $channelArray[] = $data;
+                }
+            }
+
+            // 打印存储的数据数组
+            foreach ($channelArray as $item) {
+                echo "Caller ID: " . $item['callerId'] . ", Created Date: " . $item['createdDate'] . ", Duration: " . $item['duration'] . " seconds, Extension: " . $item['extension'] . "\n";
+            }
+        } catch (Exception $e) {
+            echo "Error: " . $e->getMessage();
+        } finally {
+            $client->close();
+        }
+
+
     }
 
     /*
@@ -131,11 +174,12 @@ class Call extends Backend
             ]);
         }
 
-            $pamiClient->close();
+        $pamiClient->close();
 
     }
 
-    public function hangupAll(){
+    public function hangupAll()
+    {
         $options = [
             'host' => '192.168.203.8',
             'scheme' => 'tcp://',
@@ -175,7 +219,9 @@ class Call extends Backend
         $this->success('挂断成功');
         $pamiClient->close();
     }
-    public function hangup($extension){
+
+    public function hangup($extension)
+    {
 //        $client = new PJSIPClient();
 //        $client->hangupByExtension($extension);
         $options = [
@@ -222,21 +268,21 @@ class Call extends Backend
                     $hangupResponse = $pamiClient->send($hangupAction);
                     if ($hangupResponse->isSuccess()) {
                         $hangupPerformed = true;
-                        $this->success('挂断成功',null);
+                        $this->success('挂断成功', null);
 
                     } else {
                         $hangupPerformed = true;
-                        $this->error('挂断失败',null);
+                        $this->error('挂断失败', null);
                     }
 
 
                 }
             }
-            if($hangupPerformed===false){
+            if ($hangupPerformed === false) {
                 $this->success('Channel已经挂断');
             }
         } else {
-            $this->error('获取channel失败',null);
+            $this->error('获取channel失败', null);
         }
     }
 

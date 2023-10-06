@@ -254,6 +254,8 @@ protected string|array $quickSearchField = ['id'];
             'port' => '5038',
             'username' => 'admin',
             'secret' => 'MeYFBp4ccXtT',
+//            'username' => 'fyz',
+//            'secret' => '000418',
             'connect_timeout' => 10000,
             'read_timeout' => 10000
         );
@@ -264,7 +266,7 @@ protected string|array $quickSearchField = ['id'];
             $client->open();
         } catch (\Exception $e) {
 
-            $this->error('连接到Asterisk服务器失败',null,500);
+            $this->error('连接到Asterisk服务器失败'.$e->getMessage(),null,500);
             return;
         }
 

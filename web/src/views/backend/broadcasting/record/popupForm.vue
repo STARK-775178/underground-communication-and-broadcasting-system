@@ -30,12 +30,12 @@
                     :label-width="baTable.form.labelWidth + 'px'"
                     :rules="rules"
                 >
-                    <FormItem :label="t('broadcasting.record.broadcast_type')" type="string" v-model="baTable.form.items!.broadcast_type" prop="broadcast_type" :placeholder="t('Please input field', { field: t('broadcasting.record.broadcast_type') })" />
-                    <FormItem :label="t('broadcasting.record.caller')" type="string" v-model="baTable.form.items!.caller" prop="caller" :placeholder="t('Please input field', { field: t('broadcasting.record.caller') })" />
-                    <FormItem :label="t('broadcasting.record.broadcast_duration')" type="string" v-model="baTable.form.items!.broadcast_duration" prop="broadcast_duration" :placeholder="t('Please input field', { field: t('broadcasting.record.broadcast_duration') })" />
-                    <FormItem :label="t('broadcasting.record.broadcast_areas')" type="remoteSelects" v-model="baTable.form.items!.broadcast_areas" prop="broadcast_areas" :input-attr="{ pk: 'cbroadcast_area.id', field: 'area', 'remote-url': '/admin/device.Area/index' }" :placeholder="t('Please select field', { field: t('broadcasting.record.broadcast_areas') })" />
-                    <FormItem :label="t('broadcasting.record.broadcast_datetime')" type="datetime" v-model="baTable.form.items!.broadcast_datetime" prop="broadcast_datetime" :placeholder="t('Please select field', { field: t('broadcasting.record.broadcast_datetime') })" />
-                    <FormItem :label="t('broadcasting.record.broadcast_record')" type="file" v-model="baTable.form.items!.broadcast_record" prop="broadcast_record" />
+                    <FormItem :label="t('broadcastRecord.broadcast_type')" type="string" v-model="baTable.form.items!.broadcast_type" prop="broadcast_type" :placeholder="t('Please input field', { field: t('broadcastRecord.broadcast_type') })" />
+                    <FormItem :label="t('broadcastRecord.caller')" type="string" v-model="baTable.form.items!.caller" prop="caller" :placeholder="t('Please input field', { field: t('broadcastRecord.caller') })" />
+                    <FormItem :label="t('broadcastRecord.broadcast_duration')" type="string" v-model="baTable.form.items!.broadcast_duration" prop="broadcast_duration" :placeholder="t('Please input field', { field: t('broadcastRecord.broadcast_duration') })" />
+                    <FormItem :label="t('broadcastRecord.broadcast_areas')" type="remoteSelects" v-model="baTable.form.items!.broadcast_areas" prop="broadcast_areas" :input-attr="{ pk: 'cbroadcast_area.id', field: 'area', 'remote-url': '/admin/device.Area/index' }" :placeholder="t('Please select field', { field: t('broadcastRecord.broadcast_areas') })" />
+                    <FormItem :label="t('broadcastRecord.broadcast_datetime')" type="datetime" v-model="baTable.form.items!.broadcast_datetime" prop="broadcast_datetime" :placeholder="t('Please select field', { field: t('broadcastRecord.broadcast_datetime') })" />
+                    <FormItem :label="t('broadcastRecord.broadcast_record')" type="file" v-model="baTable.form.items!.broadcast_record" prop="broadcast_record" />
                 </el-form>
             </div>
         </el-scrollbar>
@@ -64,7 +64,7 @@ const baTable = inject('baTable') as baTableClass
 const { t } = useI18n()
 
 const rules: Partial<Record<string, FormItemRule[]>> = reactive({
-    broadcast_datetime: [buildValidatorData({ name: 'date', title: t('broadcasting.record.broadcast_datetime') })],
+    broadcast_datetime: [buildValidatorData({ name: 'date', title: t('broadcastRecord.broadcast_datetime') })],
 })
 </script>
 

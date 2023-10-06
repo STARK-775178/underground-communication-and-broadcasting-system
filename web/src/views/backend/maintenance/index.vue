@@ -41,25 +41,24 @@ const optButtons: OptButton[] = defaultOptButtons(['edit', 'delete'])
  * baTable 内包含了表格的所有数据且数据具备响应性，然后通过 provide 注入给了后代组件
  */
 const baTable = new baTableClass(
-    new baTableApi('/admin/maintenance.Maintenance/'),
+    new baTableApi('/admin/Maintenance/'),
     {
         pk: 'id',
         column: [
             { type: 'selection', align: 'center', operator: false },
             { label: t('maintenance.id'), prop: 'id', align: 'center', width: 70, operator: 'RANGE', sortable: 'custom' },
-            { label: t('maintenance.fault_start_time'), prop: 'fault_start_time', align: 'center', operator: 'eq', sortable: 'custom', width: 160 },
-            { label: t('maintenance.fault_end_time'), prop: 'fault_end_time', align: 'center', operator: 'eq', sortable: 'custom', width: 160 },
-            { label: t('maintenance.fault_type'), prop: 'fault_type', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false },
-            { label: t('maintenance.status'), prop: 'status', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false },
-            { label: t('maintenance.device__device_name'), prop: 'device.device_name', align: 'center', operatorPlaceholder: t('Fuzzy query'), render: 'tags', operator: 'LIKE' },
             { label: t('maintenance.device__adress_ip'), prop: 'device.adress_ip', align: 'center', operatorPlaceholder: t('Fuzzy query'), render: 'tags', operator: 'LIKE' },
             { label: t('maintenance.device__port'), prop: 'device.port', align: 'center', operatorPlaceholder: t('Fuzzy query'), render: 'tags', operator: 'LIKE' },
+            { label: t('maintenance.failure_start_time'), prop: 'failure_start_time', align: 'center', operator: 'eq', sortable: 'custom', width: 160 },
+            { label: t('maintenance.failure_end_time'), prop: 'failure_end_time', align: 'center', operator: 'eq', sortable: 'custom', width: 160 },
+            { label: t('maintenance.failure_type'), prop: 'failure_type', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false },
+            { label: t('maintenance.status'), prop: 'status', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false },
             { label: t('Operate'), align: 'center', width: 100, render: 'buttons', buttons: optButtons, operator: false },
         ],
         dblClickNotEditColumn: [undefined],
     },
     {
-        defaultItems: { fault_start_time: null, fault_end_time: null },
+        defaultItems: { failure_start_time: null, failure_end_time: null },
     }
 )
 
