@@ -12,7 +12,7 @@ class Time extends Backend
     /**
      * Task模型对象
      * @var object
-     * @phpstan-var \app\admin\model\broadcast\Time
+     * @phpstan-var \app\admin\model\broadcasting\Time
      */
     protected object $model;
 
@@ -25,7 +25,7 @@ class Time extends Backend
     public function initialize(): void
     {
         parent::initialize();
-        $this->model = new \app\admin\model\broadcast\Time;
+        $this->model = new \app\admin\model\broadcasting\Time;
     }
 
 

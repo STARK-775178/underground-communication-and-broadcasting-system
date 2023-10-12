@@ -71,7 +71,7 @@
 </template>
 
 <script setup lang="ts">
-import {ref, provide, onMounted, toRefs, watchEffect} from 'vue'
+import {ref, provide, onMounted, watchEffect} from 'vue'
 import baTableClass from '/@/utils/baTable'
 import { defaultOptButtons } from '/@/components/table'
 import { baTableApi } from '/@/api/common'
