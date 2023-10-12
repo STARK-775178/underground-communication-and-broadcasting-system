@@ -5,7 +5,7 @@ namespace app\admin\model\broadcasting;
 use think\Model;
 
 /**
- * Task
+ * Time
  */
 class Time extends Model
 {

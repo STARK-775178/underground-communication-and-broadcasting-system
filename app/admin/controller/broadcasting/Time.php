@@ -10,7 +10,7 @@ use app\common\controller\Backend;
 class Time extends Backend
 {
     /**
-     * Task模型对象
+     * Time模型对象
      * @var object
      * @phpstan-var \app\admin\model\broadcasting\Time
      */
