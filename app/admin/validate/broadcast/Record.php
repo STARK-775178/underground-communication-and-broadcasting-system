@@ -1,10 +1,10 @@
 <?php
 
-namespace app\admin\validate;
+namespace app\admin\validate\broadcast;
 
 use think\Validate;
 
-class BroadcastRecord extends Validate
+class Record extends Validate
 {
     protected $failException = true;
 

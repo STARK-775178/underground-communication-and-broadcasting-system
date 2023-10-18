@@ -9,6 +9,7 @@
 namespace app\admin\controller\broadcast;
 
 use app\common\controller\Backend;
+use PAMI\Client\Impl\ClientImpl as PamiClient;
 use PAMI\Message\Action\OriginateAction;
 use PAMI\Message\Action\AgiAction;
 use PAMI\Client\Impl\ClientImpl;
@@ -28,17 +29,19 @@ protected array $noNeedLogin = ['test','propagandaBroadcast'];
 
     public function test(){
 
-        $options = [
-            'host' => '192.168.203.8',
-            'scheme' => 'tcp://',
-            'port' => 5038,
-            'username' => 'admin',
-            'secret' => 'MeYFBp4ccXtT',
-            'connect_timeout' => 20000,
-            'read_timeout' => 20000
-        ];
-
-        $pamiClient = new ClientImpl($options);
+//        $options = [
+//            'host' => '192.168.203.8',
+//            'scheme' => 'tcp://',
+//            'port' => 5038,
+//            'username' => 'admin',
+//            'secret' => 'MeYFBp4ccXtT',
+//            'connect_timeout' => 20000,
+//            'read_timeout' => 20000
+//        ];
+//
+//        $pamiClient = new ClientImpl($options);
+        $clientOptions = require 'config/amiConfig.php';
+        $pamiClient = new PamiClient($clientOptions);
 
         // 尝试连接到 Asterisk
         try {
@@ -119,18 +122,19 @@ protected array $noNeedLogin = ['test','propagandaBroadcast'];
 
     public function test222(){
 
-        $options = [
-            'host' => '192.168.203.8',
-            'scheme' => 'tcp://',
-            'port' => 5038,
-            'username' => 'admin',
-            'secret' => 'MeYFBp4ccXtT',
-            'connect_timeout' => 20000,
-            'read_timeout' => 20000
-        ];
-
-        $pamiClient = new ClientImpl($options);
-
+//        $options = [
+//            'host' => '192.168.203.8',
+//            'scheme' => 'tcp://',
+//            'port' => 5038,
+//            'username' => 'admin',
+//            'secret' => 'MeYFBp4ccXtT',
+//            'connect_timeout' => 20000,
+//            'read_timeout' => 20000
+//        ];
+//
+//        $pamiClient = new ClientImpl($options);
+        $clientOptions = require 'config/amiConfig.php';
+        $pamiClient = new PamiClient($clientOptions);
         // 尝试连接到 Asterisk
         try {
             $pamiClient->open();

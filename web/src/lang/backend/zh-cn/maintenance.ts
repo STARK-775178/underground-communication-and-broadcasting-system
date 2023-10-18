@@ -1,6 +1,7 @@
 export default {
     id: 'ID',
     device_id: '音箱名称',
+    device__device_name: '设备名称',
     device__adress_ip: '服务器IP地址',
     device__port: '服务器端口',
     failure_start_time: '故障开始时间',

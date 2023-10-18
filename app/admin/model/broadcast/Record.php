@@ -1,13 +1,13 @@
 <?php
 
-namespace app\admin\model;
+namespace app\admin\model\broadcast;
 
 use think\Model;
 
 /**
- * BroadcastRecord
+ * Record
  */
-class BroadcastRecord extends Model
+class Record extends Model
 {
     // 表名
     protected $name = 'broadcast_record';

@@ -47,6 +47,7 @@ const baTable = new baTableClass(
         column: [
             { type: 'selection', align: 'center', operator: false },
             { label: t('maintenance.id'), prop: 'id', align: 'center', width: 70, operator: 'RANGE', sortable: 'custom' },
+            { label: t('maintenance.device__device_name'), prop: 'device.device_name', align: 'center', operatorPlaceholder: t('Fuzzy query'), render: 'tags', operator: 'LIKE' },
             { label: t('maintenance.device__adress_ip'), prop: 'device.adress_ip', align: 'center', operatorPlaceholder: t('Fuzzy query'), render: 'tags', operator: 'LIKE' },
             { label: t('maintenance.device__port'), prop: 'device.port', align: 'center', operatorPlaceholder: t('Fuzzy query'), render: 'tags', operator: 'LIKE' },
             { label: t('maintenance.failure_start_time'), prop: 'failure_start_time', align: 'center', operator: 'eq', sortable: 'custom', width: 160 },

@@ -30,7 +30,12 @@
                     :label-width="baTable.form.labelWidth + 'px'"
                     :rules="rules"
                 >
-                    <FormItem :label="t('brocastInfo.broad_area_ids')" type="remoteSelects" v-model="baTable.form.items!.broad_area_ids" prop="broad_area_ids" :input-attr="{ pk: 'cbroad_area.id', field: 'area', 'remote-url': '/admin/device.Area/index' }" :placeholder="t('Please select field', { field: t('brocastInfo.broad_area_ids') })" />
+                    <FormItem :label="t('broadcast.record.broadcast_type')" type="string" v-model="baTable.form.items!.broadcast_type" prop="broadcast_type" :placeholder="t('Please input field', { field: t('broadcast.record.broadcast_type') })" />
+                    <FormItem :label="t('broadcast.record.caller')" type="string" v-model="baTable.form.items!.caller" prop="caller" :placeholder="t('Please input field', { field: t('broadcast.record.caller') })" />
+                    <FormItem :label="t('broadcast.record.broadcast_duration')" type="string" v-model="baTable.form.items!.broadcast_duration" prop="broadcast_duration" :placeholder="t('Please input field', { field: t('broadcast.record.broadcast_duration') })" />
+                    <FormItem :label="t('broadcast.record.broadcast_areas')" type="remoteSelects" v-model="baTable.form.items!.broadcast_areas" prop="broadcast_areas" :input-attr="{ pk: 'cbroadcast_area.id', field: 'area', 'remote-url': '/admin/device.Area/index' }" :placeholder="t('Please select field', { field: t('broadcast.record.broadcast_areas') })" />
+                    <FormItem :label="t('broadcast.record.broadcast_datetime')" type="datetime" v-model="baTable.form.items!.broadcast_datetime" prop="broadcast_datetime" :placeholder="t('Please select field', { field: t('broadcast.record.broadcast_datetime') })" />
+                    <FormItem :label="t('broadcast.record.broadcast_record')" type="file" v-model="baTable.form.items!.broadcast_record" prop="broadcast_record" />
                 </el-form>
             </div>
         </el-scrollbar>
@@ -58,7 +63,9 @@ const baTable = inject('baTable') as baTableClass
 
 const { t } = useI18n()
 
-const rules: Partial<Record<string, FormItemRule[]>> = reactive({})
+const rules: Partial<Record<string, FormItemRule[]>> = reactive({
+    broadcast_datetime: [buildValidatorData({ name: 'date', title: t('broadcast.record.broadcast_datetime') })],
+})
 </script>
 
 <style scoped lang="scss"></style>

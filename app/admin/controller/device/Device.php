@@ -249,16 +249,15 @@ protected string|array $quickSearchField = ['id'];
         // 将JSON转换为关联数组
         $dataArr = $res->items();
         // 创建 PAMI 客户端实例
-        $clientOptions = array(
-            'host' => '192.168.203.8',
-            'port' => '5038',
-            'username' => 'admin',
-            'secret' => 'MeYFBp4ccXtT',
-//            'username' => 'fyz',
-//            'secret' => '000418',
-            'connect_timeout' => 10000,
-            'read_timeout' => 10000
-        );
+//        $clientOptions = array(
+//            'host' => '192.168.203.8',
+//            'port' => '5038',
+//            'username' => 'admin',
+//            'secret' => 'MeYFBp4ccXtT',
+//            'connect_timeout' => 10000,
+//            'read_timeout' => 10000
+//        );
+        $clientOptions = require 'config/amiConfig.php';
         $client = new ClientImpl($clientOptions);
 
         // 连接到 Asterisk 服务器

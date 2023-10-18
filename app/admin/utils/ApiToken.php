@@ -10,12 +10,16 @@
 namespace app\admin\utils;
 
 class ApiToken {
-    private $accessTokenUrl = 'http://192.168.203.8:80/admin/api/api/token';
-    private $clientId = 'ac98f618b36bf237bb13b733078d2d8697903434d1e3112510d2b6d063745068';
-    private $clientSecret = '0560836fc095ac70f1a08dccb472aafb';
+
+    private $accessTokenUrl;
+    private $clientId;
+    private $clientSecret;
 
     public function __construct() {
-
+        $config = require 'config/apiConfig.php';
+        $this->accessTokenUrl = $config['accessTokenUrl'];
+        $this->aclientId = $config['clientId'];
+        $this->clientSecret = $config['clientSecret'];
     }
 
     public function getToken() {

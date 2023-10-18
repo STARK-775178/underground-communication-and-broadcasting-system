@@ -1,6 +1,7 @@
 export default {
     id: 'id',
     device_id: 'device_id',
+    device__device_name: 'device_name',
     device__adress_ip: 'adress_ip',
     device__port: 'port',
     failure_start_time: 'failure_start_time',

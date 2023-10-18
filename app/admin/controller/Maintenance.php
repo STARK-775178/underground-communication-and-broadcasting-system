@@ -52,7 +52,7 @@ class Maintenance extends Backend
             ->where($where)
             ->order($order)
             ->paginate($limit);
-        $res->visible(['device' => ['adress_ip','port']]);
+        $res->visible(['device' => ['device_name','adress_ip','port']]);
 
         $this->success('', [
             'list'   => $res->items(),

@@ -6,7 +6,7 @@
         <!-- 自定义按钮请使用插槽，甚至公共搜索也可以使用具名插槽渲染，参见文档 -->
         <TableHeader
             :buttons="['refresh', 'add', 'edit', 'delete', 'comSearch', 'quickSearch', 'columnDisplay']"
-            :quick-search-placeholder="t('Quick search placeholder', { fields: t('broadcastRecord.quick Search Fields') })"
+            :quick-search-placeholder="t('Quick search placeholder', { fields: t('broadcast.record.quick Search Fields') })"
         ></TableHeader>
 
         <!-- 表格 -->
@@ -25,12 +25,12 @@ import baTableClass from '/@/utils/baTable'
 import { defaultOptButtons } from '/@/components/table'
 import { baTableApi } from '/@/api/common'
 import { useI18n } from 'vue-i18n'
-import PopupForm from '../record/popupForm.vue'
+import PopupForm from './popupForm.vue'
 import Table from '/@/components/table/index.vue'
 import TableHeader from '/@/components/table/header/index.vue'
 
 defineOptions({
-    name: 'broadcastRecord',
+    name: 'broadcast/record',
 })
 
 const { t } = useI18n()
@@ -41,18 +41,18 @@ const optButtons: OptButton[] = defaultOptButtons(['edit', 'delete'])
  * baTable 内包含了表格的所有数据且数据具备响应性，然后通过 provide 注入给了后代组件
  */
 const baTable = new baTableClass(
-    new baTableApi('/admin/BroadcastRecord/'),
+    new baTableApi('/admin/broadcast.Record/'),
     {
         pk: 'id',
         column: [
             { type: 'selection', align: 'center', operator: false },
-            { label: t('broadcastRecord.id'), prop: 'id', align: 'center', width: 70, operator: 'RANGE', sortable: 'custom' },
-            { label: t('broadcastRecord.broadcast_type'), prop: 'broadcast_type', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false },
-            { label: t('broadcastRecord.caller'), prop: 'caller', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false },
-            { label: t('broadcastRecord.broadcast_duration'), prop: 'broadcast_duration', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false },
-            { label: t('broadcastRecord.broadcastareastable__area'), prop: 'broadcastAreasTable.area', align: 'center', render: 'tags', operator: false },
-            { label: t('broadcastRecord.broadcastareastable__area'), prop: 'broadcast_areas', align: 'center', operator: 'FIND_IN_SET', show: false, comSearchRender: 'remoteSelect', remote: { pk: 'cbroadcast_area.id', field: 'area', remoteUrl: '/admin/device.Area/index', multiple: true } },
-            { label: t('broadcastRecord.broadcast_datetime'), prop: 'broadcast_datetime', align: 'center', operator: 'eq', sortable: 'custom', width: 160 },
+            { label: t('broadcast.record.id'), prop: 'id', align: 'center', width: 70, operator: 'RANGE', sortable: 'custom' },
+            { label: t('broadcast.record.broadcast_type'), prop: 'broadcast_type', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false },
+            { label: t('broadcast.record.caller'), prop: 'caller', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false },
+            { label: t('broadcast.record.broadcast_duration'), prop: 'broadcast_duration', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false },
+            { label: t('broadcast.record.broadcastareastable__area'), prop: 'broadcastAreasTable.area', align: 'center', render: 'tags', operator: false },
+            { label: t('broadcast.record.broadcastareastable__area'), prop: 'broadcast_areas', align: 'center', operator: 'FIND_IN_SET', show: false, comSearchRender: 'remoteSelect', remote: { pk: 'cbroadcast_area.id', field: 'area', remoteUrl: '/admin/device.Area/index', multiple: true } },
+            { label: t('broadcast.record.broadcast_datetime'), prop: 'broadcast_datetime', align: 'center', operator: 'eq', sortable: 'custom', width: 160 },
             { label: t('Operate'), align: 'center', width: 100, render: 'buttons', buttons: optButtons, operator: false },
         ],
         dblClickNotEditColumn: [undefined],
