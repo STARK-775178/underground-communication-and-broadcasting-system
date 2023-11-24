@@ -1,6 +1,8 @@
 /*
  Navicat Premium Data Transfer
 
+ 定时广播
+
  Source Server         : localhost_3306
  Source Server Type    : MySQL
  Source Server Version : 50740

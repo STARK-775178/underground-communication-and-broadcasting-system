@@ -118,6 +118,24 @@ const adminBaseRoute: RouteRecordRaw = {
                 title: pageTitle('Loading'),
             },
         },
+        {
+            // 直播广播页面
+            path: '/admin/broadcasting/propaganda/live',
+            name: 'live',
+            component: () => import('/@/views/backend/broadcasting/propaganda/live.vue'),
+            meta: {
+                title: pageTitle('live'),
+            },
+        },
+        {
+            // 录音广播页面
+            path: '/admin/broadcasting/propaganda/recording',
+            name: 'recording',
+            component: () => import('/src/views/backend/broadcasting/propaganda/recording.vue'),
+            meta: {
+                title: pageTitle('recording'),
+            },
+        },
     ],
 }
 

@@ -2,11 +2,13 @@
     <div class="default-main ba-table-box">
         <el-row :gutter="12" style="margin-top:10px;margin-bottom:20px;">
             <!-- 直播广播 -->
-            <el-col :span="24" :body-style="{ padding: '0px' }">
+            <el-col :span="12" :body-style="{ padding: '0px' }">
                 <el-card shadow="hover">
                     <div class="card-button">
                       <router-link to="/admin/broadcasting/propaganda/live">
-                        <el-button type="primary" size="large" :icon="VideoCamera" circle />
+                        <el-button type="primary" size="large" circle>
+                          <Icon name="el-icon-VideoCamera" color="white" size="25" />
+                        </el-button>
                         <el-button text size="large">
                             直播广播<el-icon class="el-icon--right"><ArrowRightBold /></el-icon>
                         </el-button>
@@ -18,21 +20,23 @@
                 </el-card>
             </el-col>
             <!-- 录音广播 -->
-<!--            <el-col :span="12" :body-style="{ padding: '0px' }">-->
-<!--                <el-card shadow="hover">-->
-<!--                    <div class="card-button">-->
-<!--                      <router-link to="/admin/broadcasting/propaganda/recorded">-->
-<!--                        <el-button type="danger" size="large" :icon="Microphone" circle />-->
-<!--                        <el-button text size="large">-->
-<!--                            录音广播<el-icon class="el-icon&#45;&#45;right"><ArrowRightBold /></el-icon>-->
-<!--                        </el-button>-->
-<!--                      </router-link>-->
-<!--                    </div>-->
-<!--                    <div class="card-text">-->
-<!--                        <span>录制好的语音广播，用于某些事件的说明</span>-->
-<!--                    </div>-->
-<!--                </el-card>-->
-<!--            </el-col>-->
+            <el-col :span="12" :body-style="{ padding: '0px' }">
+                <el-card shadow="hover">
+                    <div class="card-button">
+                      <router-link to="/admin/broadcasting/propaganda/recording">
+                        <el-button type="danger" size="large" circle>
+                          <Icon name="el-icon-Microphone" color="white" size="25" />
+                        </el-button>
+                        <el-button text size="large">
+                            录音广播<el-icon class="el-icon--right"><ArrowRightBold /></el-icon>
+                        </el-button>
+                      </router-link>
+                    </div>
+                    <div class="card-text">
+                        <span>录制好的语音广播，用于某些事件的说明</span>
+                    </div>
+                </el-card>
+            </el-col>
         </el-row>
         <el-row :gutter="12">
             <el-col :span="24" :body-style="{ padding: '0px' }">
@@ -85,13 +89,8 @@
 </template>
 
 <script setup lang="ts">
-import {
-    ArrowRightBold,
-    VideoCamera,
-    Microphone,
-    Search,
-} from '@element-plus/icons-vue'
-import {ref, provide, onMounted, watchEffect, computed} from 'vue'
+import { ArrowRightBold} from '@element-plus/icons-vue'
+import {ref, provide, onMounted, computed} from 'vue'
 import baTableClass from '/@/utils/baTable'
 import {baTableApi} from '/@/api/common'
 import {useI18n} from 'vue-i18n'
@@ -99,8 +98,8 @@ import PopupForm from './popupForm.vue'
 import Table from '/@/components/table/index.vue'
 import TableHeader from '/@/components/table/header/index.vue'
 import {loadJs} from '/@/utils/common'
-import AudioPlayer from '/@/components/audioPlayer.vue'
-import {ElNotification, TableColumnCtx} from "element-plus";
+import AudioPlayer from '/src/views/backend/broadcasting/propaganda/audioPlayer.vue'
+import { TableColumnCtx } from "element-plus";
 import { Howl } from 'howler';
 import Icon from "/@/components/icon/index.vue"; // 引入 Howl 对象
 
@@ -112,12 +111,16 @@ defineOptions({
 
 const {t} = useI18n()
 const tableRef = ref()
-const isShowAudio = ref(false); //控制播放器显示
-const centerDialogVisible = ref(false)
 const audioPlayerRef = ref(null);
+
+const recordingBroadcastIsDuring = ref(false); // 是否播放音频广播中
 const musicData = ref([]); // 当前页的音乐数据
+const baTableMusicData = ref([]); // 当前页的音乐数据
+const broadcastRecordingData = ref([]); // 需要进行广播的录音数据
+
 const currentIndex = ref(0); // 当前音乐数据索引
 const musicUrl = ref(""); // 当前播放的音乐地址
+const musicDataUrl = ref(""); // 播放音乐时间获取用的url
 const musicId = ref("");
 const previousMusicId = ref(""); // 上一首音乐信息
 const nextMusicId = ref(""); // 下一首音乐信息
@@ -141,7 +144,16 @@ function transTime(duration) {
 
 // 播放音频广播
 function playAudioBroadcast() {
-    console.log("播放音频广播")
+    console.log("播放录音广播")
+    broadcastRecordingData.value = baTable.table.selection!;
+    musicId.value = broadcastRecordingData.value[0].voice_file_id;
+    musicUrl.value = broadcastRecordingData.value[0].voice_file_url;
+    musicName.value = broadcastRecordingData.value[0].voice_file_name;
+    handleBroadcastRecordingData(broadcastRecordingData.value[0].voice_file_id);
+    currentIndex.value = broadcastRecordingData.value[0].index;
+    recordingBroadcastIsDuring.value = true;
+    // 调用子组件的方法
+    audioPlayerRef.value.playAudio();
 }
 
 /**
@@ -155,7 +167,7 @@ const baTable = new baTableClass(
             { type: 'selection', align: 'center', operator: false },
             { type: 'index', align: 'center', operator: false },
             // {label: t('broadcasting.propaganda.voice_file_id'), prop: 'voice_file_id', align: 'center', width: 100, operator: 'RANGE', sortable: 'custom'},
-            // {label: t('broadcasting.propaganda.voice_file_url'), prop: 'voice_file_url', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false},
+            {label: t('broadcasting.propaganda.voice_file_url'), prop: 'voice_file_url', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false},
             {
                 label: t('broadcasting.propaganda.voice_file_name'),
                 prop: 'voice_file_name',
@@ -180,13 +192,10 @@ const baTable = new baTableClass(
                 sortable: 'custom',
                 render: 'tags' ,
                 renderFormatter: (row: TableRow, field: TableColumn, value: any, column: TableColumnCtx<TableRow>, index: number) => {
-                    musicUrl.value = row.voice_file_url
-                    console.log("1")
+                    musicDataUrl.value = row.voice_file_url
                     // 使用 howler.js 加载音频文件并获取时长
-                    const sound = new Howl({ src: [musicUrl.value] });
-                    console.log("3")
+                    const sound = new Howl({ src: [musicDataUrl.value] });
                     sound.on('load', function() {
-                        console.log("2");
                         row.duration = transTime(sound.duration()); // 换算成时间格式
                     });
                     return row.duration;
@@ -207,20 +216,18 @@ const baTable = new baTableClass(
             musicId.value = row.voice_file_id;
             musicUrl.value = row.voice_file_url;
             musicName.value = row.voice_file_name;
-
             handleMusicData(row.voice_file_id)
-
+            recordingBroadcastIsDuring.value = false;
             currentIndex.value = row.index;
             // 调用子组件的方法
             audioPlayerRef.value.playAudio();
-            return false
+            return false;
         },
     }
 )
 
 // 根据传入的musicId获取当前歌曲的上一首和下一首并将歌曲数据
 function handleMusicData(currentMusicId: string) {
-    console.log("handleMusicData")
     musicData.value.forEach((item, index) => {
         if (item.voice_file_id === currentMusicId) {
             // 更新当前播放音乐信息
@@ -244,16 +251,49 @@ function handleMusicData(currentMusicId: string) {
     });
 }
 
+function handleBroadcastRecordingData(currentMusicId: string) {
+    console.log("获取上一首和下一首")
+    broadcastRecordingData.value.forEach((item, index) => {
+        if (item.voice_file_id === currentMusicId) {
+            // 更新当前播放音乐信息
+            musicId.value = item.voice_file_id;
+            musicUrl.value = item.voice_file_url;
+            musicName.value = item.voice_file_name;
+            // 更新上一首歌
+            if (index === 0) {
+                previousMusicId.value = broadcastRecordingData.value[broadcastRecordingData.value.length - 1].voice_file_id;
+            } else if (index > 0) {
+                previousMusicId.value = broadcastRecordingData.value[index - 1].voice_file_id;
+            }
+            // 更新下一首歌
+            if (index === broadcastRecordingData.value.length - 1) {
+                nextMusicId.value = broadcastRecordingData.value[0].voice_file_id;
+            } else if (index < broadcastRecordingData.value.length - 1) {
+                nextMusicId.value = broadcastRecordingData.value[index + 1].voice_file_id;
+            }
+        }
+        index++;
+    });
+}
+
 //播放上一首
 function previousAudio() {
     console.log("页面上一首")
-    handleMusicData(previousMusicId.value)
+    if (recordingBroadcastIsDuring.value === true) {
+        handleBroadcastRecordingData(previousMusicId.value);
+    }else {
+        handleMusicData(previousMusicId.value)
+    }
 }
 
 //播放下一首
 function nextAudio() {
     console.log("页面下一首")
-    handleMusicData(nextMusicId.value)
+    if (recordingBroadcastIsDuring.value === true) {
+        handleBroadcastRecordingData(nextMusicId.value);
+    }else {
+        handleMusicData(nextMusicId.value)
+    }
 }
 
 provide('baTable', baTable)

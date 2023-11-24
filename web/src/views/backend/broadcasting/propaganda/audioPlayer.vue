@@ -1,6 +1,6 @@
 <template>
   <div>
-    <audio @timeupdate="updateProgress" ref="audioRef" :src="fileurl" autoplay controls loop style="display: none"></audio>
+    <audio @timeupdate="updateProgress" ref="audioRef" :src="fileurl" autoplay controls style="display: none"></audio>
     <el-slider class="slider_box" v-model="currentProgress" :show-tooltip="false" @change="handleProgressChange" />
     <div class="audio_right">
       <div class="left">{{ filename }}</div>
@@ -43,8 +43,8 @@
 </template>
 
 <script setup>
-import {ref, onMounted, computed} from "vue";
-import Icon from "/@/components/icon/index.vue";
+import {ref, onMounted} from "vue";
+import Icon from "/src/components/icon/index.vue";
 const props = defineProps({
     fileid: "",
     fileurl: "",
@@ -96,9 +96,11 @@ function calculateDuration(fileurl) {
 function transTime(duration) {
     const minutes = Math.floor(duration / 60);
     const seconds = Math.floor(duration % 60);
+    const hours = Math.floor(duration / 60 / 60);
     const formattedMinutes = String(minutes).padStart(2, "0"); //padStart(2,"0") 使用0填充使字符串长度达到2
     const formattedSeconds = String(seconds).padStart(2, "0");
-    return `${formattedMinutes}:${formattedSeconds}`;
+    const formattedHours = String(hours).padStart(2, "0");
+    return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
 }
 
 // 播放暂停控制
@@ -135,6 +137,11 @@ function updateProgress(e) {
         currentProgress.value = value * 100;
         audioStart.value = transTime(audioRef.value.currentTime);
     }
+    // 如果播放完成 自动播放下一首
+    if ( e.target.currentTime === e.target.duration) {
+        console.log("当前歌曲已播放完毕")
+        nextAudio();
+    }
 }
 
 //调整播放进度
@@ -142,17 +149,11 @@ const handleProgressChange = (val) => {
     if (!val) {
         return;
     }
-    // audioRef.value.pause();
-    console.log("            audioRef.value.currentTime" + audioRef.value.currentTime)
+    audioRef.value.pause();
     let currentTime = duration.value * (val / 100);
-    console.log("duration.value" + duration.value)
-    console.log("duration.value * (val / 100)" + duration.value * (val / 100))
-    // 现在可以安全地设置currentTime
     audioRef.value.currentTime = currentTime;
     audioRef.value.play();
     audioIsPlay.value = false;
-    console.log("currentTime" + currentTime)
-    console.log("audioRef.value.currentTime" + audioRef.value.currentTime)
 };
 
 //调整音量
