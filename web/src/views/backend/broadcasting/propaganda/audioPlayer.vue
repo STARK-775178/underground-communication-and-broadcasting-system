@@ -1,44 +1,53 @@
 <template>
-  <div>
+  <div style="width: auto">
     <audio @timeupdate="updateProgress" ref="audioRef" :src="fileurl" autoplay controls style="display: none"></audio>
     <el-slider class="slider_box" v-model="currentProgress" :show-tooltip="false" @change="handleProgressChange" />
+    <el-row>
     <div class="audio_right">
-      <div class="left">{{ filename }}</div>
-      <div class="center">
-        <el-button text size="large" @click="previousAudio" alt="上一首">
-          <Icon name="el-icon-CaretLeft" color="grey" size="70" />
-        </el-button>
-        <el-button v-if="!audioIsPlay" text size="large" @click="playAudio" alt="播放">
-          <Icon name="el-icon-VideoPause" color="aquamarine" size="70" />
-        </el-button>
-        <el-button v-if="audioIsPlay" text size="large" @click="playAudio" alt="暂停">
-          <Icon name="el-icon-VideoPlay" color="aquamarine" size="70" />
-        </el-button>
-        <el-button text size="large" @click="nextAudio" alt="下一首">
-          <Icon name="el-icon-CaretRight" color="grey" size="70" />
-        </el-button>
-      </div>
-      <div class="audio_time">{{ audioStart }}/{{ durationTime }}</div>
-      <div class="volume">
-        <div class="volume_progress" v-show="audioHuds">
-          <el-slider
-              vertical
-              height="100px"
-              class="volume_bar"
-              v-model="audioVolume"
-              :show-tooltip="false"
-              @change="handleAudioVolume"
-          />
+      <el-col span="4">
+        <div class="left">{{ filename }}</div>
+      </el-col>
+      <el-col span="12">
+        <div class="center">
+          <el-button text size="large" @click="previousAudio" alt="上一首">
+            <Icon name="el-icon-CaretLeft" color="grey" size="70" />
+          </el-button>
+          <el-button v-if="!audioIsPlay" text size="large" @click="playAudio" alt="播放">
+            <Icon name="el-icon-VideoPause" color="aquamarine" size="70" />
+          </el-button>
+          <el-button v-if="audioIsPlay" text size="large" @click="playAudio" alt="暂停">
+            <Icon name="el-icon-VideoPlay" color="aquamarine" size="70" />
+          </el-button>
+          <el-button text size="large" @click="nextAudio" alt="下一首">
+            <Icon name="el-icon-CaretRight" color="grey" size="70" />
+          </el-button>
         </div>
-        <el-button text v-if="audioVolume <= 0" size="large" @click.stop="audioHuds = !audioHuds" alt="静音">
-          <Icon name="el-icon-Mute" color="grey" size="40" />
-        </el-button>
-        <el-button text v-if="audioVolume > 0" size="large" @click.stop="audioHuds = !audioHuds" alt="非静音">
-          <Icon name="el-icon-Microphone" color="grey" size="40" />
-        </el-button>
-
-      </div>
+      </el-col>
+      <el-col span="4">
+        <div class="audio_time">{{ audioStart }}/{{ durationTime }}</div>
+      </el-col>
+      <el-col span="4">
+        <div class="volume">
+          <div class="volume_progress" v-show="audioHuds">
+            <el-slider
+                vertical
+                height="100px"
+                class="volume_bar"
+                v-model="audioVolume"
+                :show-tooltip="false"
+                @change="handleAudioVolume"
+            />
+          </div>
+          <el-button text v-if="audioVolume <= 0" size="large" @click.stop="audioHuds = !audioHuds" alt="静音">
+            <Icon name="el-icon-Mute" color="grey" size="40" />
+          </el-button>
+          <el-button text v-if="audioVolume > 0" size="large" @click.stop="audioHuds = !audioHuds" alt="非静音">
+            <Icon name="el-icon-Microphone" color="grey" size="40" />
+          </el-button>
+        </div>
+      </el-col>
     </div>
+    </el-row>
   </div>
 </template>
 
@@ -164,7 +173,7 @@ const handleAudioVolume = (val) => {
 
 <style lang="scss" scoped>
 .audio_right {
-  width: 1400px;
+  width: 100%;
   height: 80px;
   display: flex;
   justify-content: space-around;

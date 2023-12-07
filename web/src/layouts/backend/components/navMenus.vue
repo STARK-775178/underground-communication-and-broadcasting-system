@@ -1,5 +1,32 @@
 <template>
     <div class="nav-menus" :class="configStore.layout.layoutMode">
+        <div @click="dialogTableVisible = true" class="nav-menu-item pt2">
+            <el-badge :is-dot="terminal.state.showDot">
+                <Icon :color="iconColor" class="nav-menu-icon" name="el-icon-Bell" size="20"/>
+            </el-badge>
+            <el-dialog v-model="dialogTableVisible" title="定时广播">
+<!--                <div style="justify-content: center; align-items: center; text-align: center" class="dialog-row">-->
+<!--                  <el-col>-->
+<!--                    <el-text class="mx-1" size="default">{{ formatDuration }}</el-text>-->
+<!--                  </el-col>-->
+<!--                </div>-->
+                <el-table :data="broadcastRecordingData">
+                    <el-table-column property="recording_file_url" label="文件地址" width="250px"/>
+                    <el-table-column property="recording_file_name" label="文件名称"/>
+                    <el-table-column property="remark" label="备注" />
+                    <el-table-column property="duration" label="时长" />
+                </el-table>
+              <audio-player
+                  ref="audioPlayerRef"
+                  class="audio-box"
+                  :fileid="musicId"
+                  :fileurl="musicUrl"
+                  :filename="musicName"
+                  @previousAudio="previousAudio"
+                  @nextAudio="nextAudio"
+              ></audio-player>
+            </el-dialog>
+        </div>
         <router-link class="h100" target="_blank" :title="t('Home')" to="/">
             <div class="nav-menu-item">
                 <Icon :color="configStore.getColorVal('headerBarTabColor')" class="nav-menu-icon" name="el-icon-Monitor" size="18" />
@@ -103,7 +130,7 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive } from 'vue'
+import {reactive, watchEffect} from 'vue'
 import { editDefaultLang } from '/@/lang'
 import screenfull from 'screenfull'
 import { useConfig } from '/@/stores/config'
@@ -119,6 +146,26 @@ import { routePush } from '/@/utils/router'
 import { logout } from '/@/api/backend/index'
 import { postClearCache } from '/@/api/common'
 import TerminalVue from '/@/components/terminal/index.vue'
+
+import { ref } from 'vue'
+import AudioPlayer from "/@/views/backend/broadcasting/propaganda/audioPlayer.vue";
+import mittBus from "/@/utils/mittBus";
+import {computed} from "vue/dist/vue";
+
+const dialogTableVisible = ref(false)
+const broadcastRecordingData = ref([]); // 需要进行广播的录音数据
+const iconColor = ref("black"); //
+
+const musicId = ref(""); // 音乐Id
+const musicName = ref(""); // 音乐名称
+const musicUrl = ref(""); // 当前播放的音乐地址
+const audioPlayerRef = ref(null);
+const recordingBroadcastIsDuring = ref(false); // 是否播放音频广播中
+const currentIndex = ref(0); // 当前音乐数据索引
+const previousMusicId = ref(""); // 上一首音乐信息
+const nextMusicId = ref(""); // 下一首音乐信息
+// const callStartTime = ref(0) // 通话时长定时器
+// const callDuration = ref(0) // 通话时长定时器
 
 const { t } = useI18n()
 
@@ -170,6 +217,70 @@ const onClearCache = (type: string) => {
     }
     postClearCache(type).then(() => {})
 }
+
+mittBus.on('playBroadcastTasks', (res) => {
+    // 获取需要播放的数据
+    console.log("res:" + res);
+    broadcastRecordingData.value = res;
+    // 更新音频文件数据
+    console.log("播放录音广播");
+    musicId.value = broadcastRecordingData.value[0].recording_file_id;
+    musicUrl.value = broadcastRecordingData.value[0].recording_file_url;
+    musicName.value = broadcastRecordingData.value[0].recording_file_name;
+    handleBroadcastRecordingData(broadcastRecordingData.value[0].recording_file_id);
+    currentIndex.value = broadcastRecordingData.value[0].index;
+    // 打开播放框
+    dialogTableVisible.value = true
+    // 更改标签的颜色
+    iconColor.value = "red";
+    //todo 开启广播时间计时
+
+    //todo  获取区域连接各分机
+
+    // 调用子组件的方法
+    audioPlayerRef.value.playAudio();
+    // 是否播放音频广播中
+    recordingBroadcastIsDuring = true;
+})
+
+// 根据传入的musicId获取当前播放列表歌曲的上一首和下一首
+function handleBroadcastRecordingData(currentMusicId: string) {
+    console.log("获取上一首和下一首")
+    broadcastRecordingData.value.forEach((item, index) => {
+        if (item.recording_file_id === currentMusicId) {
+            // 更新当前播放音乐信息
+            musicId.value = item.recording_file_id;
+            musicUrl.value = item.recording_file_url;
+            musicName.value = item.recording_file_name;
+            // 更新上一首歌
+            if (index === 0) {
+                previousMusicId.value = broadcastRecordingData.value[broadcastRecordingData.value.length - 1].recording_file_id;
+            } else if (index > 0) {
+                previousMusicId.value = broadcastRecordingData.value[index - 1].recording_file_id;
+            }
+            // 更新下一首歌
+            if (index === broadcastRecordingData.value.length - 1) {
+                nextMusicId.value = broadcastRecordingData.value[0].recording_file_id;
+            } else if (index < broadcastRecordingData.value.length - 1) {
+                nextMusicId.value = broadcastRecordingData.value[index + 1].recording_file_id;
+            }
+        }
+        index++;
+    });
+}
+
+//播放上一首
+function previousAudio() {
+    console.log("页面上一首")
+    handleBroadcastRecordingData(previousMusicId.value);
+}
+
+//播放下一首
+function nextAudio() {
+    console.log("页面下一首")
+    handleBroadcastRecordingData(nextMusicId.value);
+}
+
 </script>
 
 <style scoped lang="scss">
@@ -258,5 +369,24 @@ const onClearCache = (type: string) => {
     100% {
         transform: scale(1);
     }
+}
+
+.el-button--text {
+    margin-right: 15px;
+}
+.el-select {
+    width: 300px;
+}
+.el-input {
+    width: 300px;
+}
+.dialog-footer button:first-child {
+    margin-right: 10px;
+}
+
+.dialog-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
 }
 </style>

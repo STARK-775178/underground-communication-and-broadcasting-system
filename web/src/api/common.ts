@@ -354,3 +354,19 @@ export class baTableApi {
         })
     }
 }
+
+export function indexBroadcastTasks(data: anyObj) {
+    return createAxios({
+        url: '/admin/broadcasting.Time/index',
+        method: 'post',
+        data: data,
+    })
+}
+
+export function indexMusicDatas(data: anyObj) {
+    return createAxios({
+        url: '/admin/broadcasting.propaganda.Recording/index',
+        method: 'post',
+        data: data,
+    })
+}

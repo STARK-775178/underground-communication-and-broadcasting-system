@@ -2,6 +2,7 @@
   "dependencies": {
     "@liripeng/vue-audio-player": "^1.5.2",
     "howler": "^2.2.4",
+    "mitt": "^3.0.1",
     "moment": "^2.29.4",
     "recorder-core": "^1.2.23070100"
   },
