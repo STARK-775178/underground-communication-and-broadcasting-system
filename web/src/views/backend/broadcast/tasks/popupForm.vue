@@ -30,12 +30,10 @@
                     :label-width="baTable.form.labelWidth + 'px'"
                     :rules="rules"
                 >
-<!--                    <FormItem :label="t('broadcasting.time.task_id')" type="string" v-model="baTable.form.items!.task_id" prop="task_id" :placeholder="t('Please input field', { field: t('broadcasting.time.task_id') })" />-->
-                    <FormItem :label="t('broadcasting.time.task_name')" type="string" v-model="baTable.form.items!.task_name" prop="task_name" :placeholder="t('Please input field', { field: t('broadcasting.time.task_name') })" />
-                    <FormItem :label="t('broadcasting.time.start_datetime')" type="datetime" v-model="baTable.form.items!.start_datetime" prop="start_datetime" :placeholder="t('Please select field', { field: t('broadcasting.time.start_datetime') })" />
-                    <FormItem :label="t('broadcasting.time.reminder_time')" type="checkbox" v-model="baTable.form.items!.reminder_time" prop="reminder_time" :data="{ content: { opt0: '提前5分钟提醒', opt1: '提前15分钟提醒', opt2: '提前30分钟提醒', opt3: '提前1小时提醒', opt4: '提前2小时提醒', opt5: '提前1天提醒', opt6: '提前2天提醒' } }" :placeholder="t('Please select field', { field: t('broadcasting.time.reminder_time') })" />
-                    <FormItem :label="t('broadcasting.time.reminder_method')" type="select" v-model="baTable.form.items!.reminder_method" prop="reminder_method" :data="{ content: { opt0: '站内提醒' } }" :placeholder="t('Please select field', { field: t('broadcasting.time.reminder_method') })" />
-                    <FormItem :label="t('broadcasting.time.remark')" type="textarea" v-model="baTable.form.items!.remark" prop="remark" :placeholder="t('Please input field', { field: t('broadcasting.time.remark') })" />
+                    <FormItem :label="t('broadcast.tasks.execution_time')" type="datetime" v-model="baTable.form.items!.execution_time" prop="execution_time" :placeholder="t('Please select field', { field: t('broadcast.tasks.execution_time') })" />
+                    <FormItem :label="t('broadcast.tasks.broadcast_area_ids')" type="remoteSelects" v-model="baTable.form.items!.broadcast_area_ids" prop="broadcast_area_ids" :input-attr="{ pk: 'cbroadcast_area.id', field: 'area', 'remote-url': '/admin/device.Area/index' }" :placeholder="t('Please select field', { field: t('broadcast.tasks.broadcast_area_ids') })" />
+                    <FormItem :label="t('broadcast.tasks.broadcast_file')" type="string" v-model="baTable.form.items!.broadcast_file" prop="broadcast_file" :placeholder="t('Please input field', { field: t('broadcast.tasks.broadcast_file') })" />
+                    <FormItem :label="t('broadcast.tasks.status')" type="switch" v-model="baTable.form.items!.status" prop="status" :data="{ content: { '0': t('broadcast.tasks.status 0'), '1': t('broadcast.tasks.status 1') } }" />
                 </el-form>
             </div>
         </el-scrollbar>
@@ -64,9 +62,9 @@ const baTable = inject('baTable') as baTableClass
 const { t } = useI18n()
 
 const rules: Partial<Record<string, FormItemRule[]>> = reactive({
-    start_datetime: [buildValidatorData({ name: 'date', title: t('broadcasting.time.start_datetime') })],
-    create_time: [buildValidatorData({ name: 'date', title: t('broadcasting.time.create_time') })],
-    update_time: [buildValidatorData({ name: 'date', title: t('broadcasting.time.update_time') })],
+    execution_time: [buildValidatorData({ name: 'date', title: t('broadcast.tasks.execution_time') })],
+    create_time: [buildValidatorData({ name: 'date', title: t('broadcast.tasks.create_time') })],
+    updated_time: [buildValidatorData({ name: 'date', title: t('broadcast.tasks.updated_time') })],
 })
 </script>
 
