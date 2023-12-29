@@ -9,8 +9,11 @@ use think\Model;
  */
 class Tasks extends Model
 {
+    // 表主键
+    protected $pk = 'head_id';
+    
     // 表名
-    protected $name = 'broadcast_tasks';
+    protected $name = 'broadcast_tasks_head';
 
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = true;

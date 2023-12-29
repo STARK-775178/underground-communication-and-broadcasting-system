@@ -43,24 +43,27 @@ const optButtons: OptButton[] = defaultOptButtons(['edit', 'delete'])
 const baTable = new baTableClass(
     new baTableApi('/admin/broadcast.Tasks/'),
     {
-        pk: 'id',
+        pk: 'head_id',
         column: [
             { type: 'selection', align: 'center', operator: false },
-            { label: t('broadcast.tasks.id'), prop: 'id', align: 'center', width: 70, operator: 'RANGE', sortable: 'custom' },
-            { label: t('broadcast.tasks.execution_time'), prop: 'execution_time', align: 'center', render: 'datetime', operator: 'RANGE', sortable: 'custom', width: 160, timeFormat: 'yyyy-mm-dd hh:MM:ss' },
+            { label: t('broadcast.tasks.head_id'), prop: 'head_id', align: 'center', width: 70, operator: 'RANGE', sortable: 'custom' },
+            { label: t('broadcast.tasks.name'), prop: 'name', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false },
+            { label: t('broadcast.tasks.execution_time'), prop: 'execution_time', align: 'center', operator: 'RANGE', sortable: false, width: 160, timeFormat: 'yyyy-mm-dd hh:MM:ss' },
+            { label: t('broadcast.tasks.broadcast_area_ids'), prop: 'broadcast_area_ids', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE' },
             { label: t('broadcast.tasks.broadcastarea__area'), prop: 'broadcastArea.area', align: 'center', render: 'tags', operator: false },
             { label: t('broadcast.tasks.broadcastarea__area'), prop: 'broadcast_area_ids', align: 'center', operator: 'FIND_IN_SET', show: false, comSearchRender: 'remoteSelect', remote: { pk: 'cbroadcast_area.id', field: 'area', remoteUrl: '/admin/device.Area/index', multiple: true } },
-            { label: t('broadcast.tasks.broadcast_file'), prop: 'broadcast_file', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false },
+            { label: t('broadcast.tasks.task_status'), prop: 'task_status', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false, replaceValue: { NEW: t('broadcast.tasks.task_status NEW'), EXECUTING: t('broadcast.tasks.task_status EXECUTING'), ' FINISH': t('broadcast.tasks.task_status  FINISH') } },
+            { label: t('broadcast.tasks.source'), prop: 'source', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false, replaceValue: { OTHER: t('broadcast.tasks.source OTHER'), ' THIS': t('broadcast.tasks.source  THIS') } },
             { label: t('broadcast.tasks.create_time'), prop: 'create_time', align: 'center', render: 'datetime', operator: 'RANGE', sortable: 'custom', width: 160, timeFormat: 'yyyy-mm-dd hh:MM:ss' },
-            { label: t('broadcast.tasks.updated_time'), prop: 'updated_time', align: 'center', render: 'datetime', operator: 'RANGE', sortable: 'custom', width: 160, timeFormat: 'yyyy-mm-dd hh:MM:ss' },
-            { label: t('broadcast.tasks.status'), prop: 'status', align: 'center', render: 'switch', operator: 'eq', sortable: false, replaceValue: { '0': t('broadcast.tasks.status 0'), '1': t('broadcast.tasks.status 1') } },
+            { label: t('broadcast.tasks.updated_time'), prop: 'updated_time', align: 'center', operator: 'RANGE', sortable: false, width: 160, timeFormat: 'yyyy-mm-dd hh:MM:ss' },
+            { label: t('broadcast.tasks.status'), prop: 'status', align: 'center', operator: 'RANGE', sortable: false, replaceValue: { '0': t('broadcast.tasks.status 0'), '1': t('broadcast.tasks.status 1') } },
             { label: t('Operate'), align: 'center', width: 100, render: 'buttons', buttons: optButtons, operator: false },
         ],
-        dblClickNotEditColumn: [undefined, 'status'],
-        defaultOrder: { prop: 'id', order: 'asc' },
+        dblClickNotEditColumn: [undefined],
+        defaultOrder: { prop: 'head_id', order: 'desc' },
     },
     {
-        defaultItems: { execution_time: null, status: '1' },
+        defaultItems: { name: null, execution_time: null, broadcast_file: null, task_status: null, source: null, status: 1 },
     }
 )
 
