@@ -11,11 +11,13 @@ use app\admin\utils\ApiToken;
 
 class GraphQLRequest
 {
-    private $gqlUrl = 'http://192.168.203.8:80/admin/api/api/gql';
+    private $gqlUrl;
     private $token;
 
     public function __construct()
     {
+        $config = require 'config/apiConfig.php';
+        $this->gqlUrl = $config['gqlUrl'];
         $apiToken = new ApiToken();
         $this->token = $apiToken->getToken();
     }

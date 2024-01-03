@@ -12,8 +12,9 @@
         <!-- 表格 -->
         <!-- 表格列有多种自定义渲染方式，比如自定义组件、具名插槽等，参见文档 -->
         <!-- 要使用 el-table 组件原有的属性，直接加在 Table 标签上即可 -->
-        <Table ref="tableRef"></Table>
+        <Table ref="tableRef">
 
+        </Table>
         <!-- 表单 -->
         <PopupForm />
     </div>
@@ -47,16 +48,69 @@ const baTable = new baTableClass(
         column: [
             { type: 'selection', align: 'center', operator: false },
             { label: t('device.id'), prop: 'id', align: 'center', width: 70, operator: 'RANGE', sortable: 'custom' },
-            { label: t('device.device_type'), prop: 'device_type', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false },
-            { label: t('device.user_name'), prop: 'user_name', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false },
-            { label: t('device.password'), prop: 'password', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false },
-            { label: t('device.adress_ip'), prop: 'adress_ip', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false },
+            {
+                label: t('device.device_type'),
+                prop: 'device_type',
+                align: 'center',
+                operatorPlaceholder: t('Fuzzy query'),
+                operator: 'LIKE',
+                sortable: false,
+            },
+            {
+                label: t('device.user_name'),
+                prop: 'user_name',
+                align: 'center',
+                operatorPlaceholder: t('Fuzzy query'),
+                operator: 'LIKE',
+                sortable: false,
+            },
+            {
+                label: t('device.password'),
+                prop: 'password',
+                align: 'center',
+                operatorPlaceholder: t('Fuzzy query'),
+                operator: 'LIKE',
+                sortable: false,
+            },
+            {
+                label: t('device.adress_ip'),
+                prop: 'adress_ip',
+                align: 'center',
+                operatorPlaceholder: t('Fuzzy query'),
+                operator: 'LIKE',
+                sortable: false,
+            },
             { label: t('device.port'), prop: 'port', align: 'center', operator: 'RANGE', sortable: false },
             { label: t('device.phone'), prop: 'phone', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false },
-            { label: t('device.device_name'), prop: 'device_name', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false },
+            {
+                label: t('device.device_name'),
+                prop: 'device_name',
+                align: 'center',
+                operatorPlaceholder: t('Fuzzy query'),
+                operator: 'LIKE',
+                sortable: false,
+            },
             // { label: t('device.work_area'), prop: 'work_area', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE' },
-            { label: t('device.work_area'), prop: 'work_area', align: 'center', operatorPlaceholder: t('Fuzzy query'), render: 'tags', operator: 'LIKE' },
-            { label: t('device.status'), prop: 'status', align: 'center', render: 'switch', operator: 'eq', sortable: false, replaceValue: { '0': t('device.status 0'), '1': t('device.status 1') } },
+            {
+                label: t('device.work_area'),
+                prop: 'work_area',
+                align: 'center',
+                operatorPlaceholder: t('Fuzzy query'),
+                render: 'tags',
+                operator: 'LIKE',
+            },
+            {
+                label: t('device.status'),
+                prop: 'status',
+                render: 'tag',
+                align: 'center',
+                operator: 'eq',
+                sortable: false,
+                custom: { 1: 'success', 0: 'danger' },
+                replaceValue: { '0': t('device.status 0'), '1': t('device.status 1') },
+            },
+
+
             { label: t('Operate'), align: 'center', width: 100, render: 'buttons', buttons: optButtons, operator: false },
         ],
         dblClickNotEditColumn: [undefined],
@@ -79,4 +133,14 @@ onMounted(() => {
 })
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped>
+.status-online {
+    background-color: #67c23a; /* 绿色 */
+    color: white;
+}
+
+.status-offline {
+    background-color: #f56c6c; /* 红色 */
+    color: white;
+}
+</style>

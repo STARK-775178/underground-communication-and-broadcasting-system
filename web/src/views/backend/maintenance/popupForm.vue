@@ -30,11 +30,11 @@
                     :label-width="baTable.form.labelWidth + 'px'"
                     :rules="rules"
                 >
-                    <FormItem :label="t('maintenance.fault_start_time')" type="datetime" v-model="baTable.form.items!.fault_start_time" prop="fault_start_time" :placeholder="t('Please select field', { field: t('maintenance.fault_start_time') })" />
-                    <FormItem :label="t('maintenance.fault_end_time')" type="datetime" v-model="baTable.form.items!.fault_end_time" prop="fault_end_time" :placeholder="t('Please select field', { field: t('maintenance.fault_end_time') })" />
-                    <FormItem :label="t('maintenance.fault_type')" type="string" v-model="baTable.form.items!.fault_type" prop="fault_type" :placeholder="t('Please input field', { field: t('maintenance.fault_type') })" />
-                    <FormItem :label="t('maintenance.status')" type="string" v-model="baTable.form.items!.status" prop="status" :placeholder="t('Please input field', { field: t('maintenance.status') })" />
                     <FormItem :label="t('maintenance.device_id')" type="remoteSelect" v-model="baTable.form.items!.device_id" prop="device_id" :input-attr="{ pk: 'cdevice.id', field: 'device_name', 'remote-url': '/admin/device.Device/index' }" :placeholder="t('Please select field', { field: t('maintenance.device_id') })" />
+                    <FormItem :label="t('maintenance.failure_start_time')" type="datetime" v-model="baTable.form.items!.failure_start_time" prop="failure_start_time" :placeholder="t('Please select field', { field: t('maintenance.failure_start_time') })" />
+                    <FormItem :label="t('maintenance.failure_end_time')" type="datetime" v-model="baTable.form.items!.failure_end_time" prop="failure_end_time" :placeholder="t('Please select field', { field: t('maintenance.failure_end_time') })" />
+                    <FormItem :label="t('maintenance.failure_type')" type="string" v-model="baTable.form.items!.failure_type" prop="failure_type" :placeholder="t('Please input field', { field: t('maintenance.failure_type') })" />
+                    <FormItem :label="t('maintenance.status')" type="string" v-model="baTable.form.items!.status" prop="status" :placeholder="t('Please input field', { field: t('maintenance.status') })" />
                 </el-form>
             </div>
         </el-scrollbar>
@@ -63,8 +63,8 @@ const baTable = inject('baTable') as baTableClass
 const { t } = useI18n()
 
 const rules: Partial<Record<string, FormItemRule[]>> = reactive({
-    fault_start_time: [buildValidatorData({ name: 'date', title: t('maintenance.fault_start_time') })],
-    fault_end_time: [buildValidatorData({ name: 'date', title: t('maintenance.fault_end_time') })],
+    failure_start_time: [buildValidatorData({ name: 'date', title: t('maintenance.failure_start_time') })],
+    failure_end_time: [buildValidatorData({ name: 'date', title: t('maintenance.failure_end_time') })],
 })
 </script>
 

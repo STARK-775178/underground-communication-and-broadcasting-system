@@ -10,8 +10,7 @@ namespace app\admin\controller\broadcast;
 use app\common\controller\Backend;
 use PAMI\Client\Impl\ClientImpl as PamiClient;
 use PAMI\Message\Action\OriginateAction;
-use PAMI\Message\Action\HangupAction;
-use PAMI\Message\Action\CoreShowChannelsAction;
+
 
 class AreaBroadcast extends Backend
 {
@@ -70,16 +69,18 @@ class AreaBroadcast extends Backend
             $pagingConfig = $this->pagingConfigModel->where('description',$areaBroadcastDescription)->find();
 //      调用Call方法报错，目前无法解决
 
-        $options = [
-            'host' => '192.168.203.8',
-            'scheme' => 'tcp://',
-            'port' => 5038,
-            'username' => 'admin',
-            'secret' => 'MeYFBp4ccXtT',
-            'connect_timeout' => 20000,
-            'read_timeout' => 20000
-        ];
-        $pamiClient = new PamiClient($options);
+//        $options = [
+//            'host' => '192.168.203.8',
+//            'scheme' => 'tcp://',
+//            'port' => 5038,
+//            'username' => 'admin',
+//            'secret' => 'MeYFBp4ccXtT',
+//            'connect_timeout' => 20000,
+//            'read_timeout' => 20000
+//        ];
+//        $pamiClient = new PamiClient($options);
+        $clientOptions = require 'config/amiConfig.php';
+        $pamiClient = new PamiClient($clientOptions);
         // 尝试连接到Asterisk
         try {
             $pamiClient->open();
