@@ -355,18 +355,16 @@ export class baTableApi {
     }
 }
 
-export function indexBroadcastTasks(data: anyObj) {
+export function indexBroadcastTasks() {
     return createAxios({
-        url: '/admin/broadcasting.Time/index',
-        method: 'post',
-        data: data,
+        url: '/admin/broadcast.Tasks/indexBroadcastTasks',
+        method: 'get',
     })
 }
 
-export function indexMusicDatas(data: anyObj) {
+export function indexBroadcastTasksLineByHeadId(headId: number,) {
     return createAxios({
-        url: '/admin/broadcasting.propaganda.Recording/index',
-        method: 'post',
-        data: data,
+        url: '/admin/broadcast.Tasks/indexBroadcastTasksLineByHeadId?head_id=' + headId,
+        method: 'get',
     })
 }
