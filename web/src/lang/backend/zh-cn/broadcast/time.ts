@@ -7,5 +7,7 @@ export default {
     remark: '备注',
     create_time: '创建时间',
     update_time: '修改时间',
+    start_broadcasting :'开始广播',
+    remaining_datetime : '剩余广播时间',
     'quick Search Fields': '定时广播任务ID',
 }

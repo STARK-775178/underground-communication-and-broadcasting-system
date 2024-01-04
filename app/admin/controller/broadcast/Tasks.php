@@ -37,8 +37,8 @@ class Tasks extends Backend
         parent::initialize();
         $this->model = new \app\admin\model\broadcast\Tasks;
         $this->cbroadcastTasksLineModel = new \app\admin\model\broadcast\tasks\Line;
-        $this->crecordingFile = new \app\admin\model\broadcast\RecordingFile;
-        $this->cvoiceFile = new \app\admin\model\broadcast\VoiceFile;
+        $this->crecordingFile = new \app\admin\model\broadcast\propaganda\Recording;
+        $this->cvoiceFile = new \app\admin\model\broadcast\Propaganda;
     }
 
     /**

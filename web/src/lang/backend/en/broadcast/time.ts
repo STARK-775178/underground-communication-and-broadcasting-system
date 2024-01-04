@@ -7,5 +7,7 @@ export default {
     remark: 'remark',
     create_time: 'create_time',
     update_time: 'update_time',
+    start_broadcasting :'start_broadcasting',
+    remaining_datetime : 'remaining_datetime',
     'quick Search Fields': 'task_id',
 }

@@ -30,10 +30,10 @@
             :label-width="baTable.form.labelWidth + 'px'"
             :rules="rules"
         >
-          <FormItem :label="t('broadcasting.propaganda.recording.recording_file_name')" type="string" v-model="baTable.form.items!.recording_file_name" prop="recording_file_name" :placeholder="t('Please input field', { field: t('broadcasting.propaganda.recording.recording_file_name') })" />
-<!--          <FormItem :label="t('broadcasting.propaganda.recording.recording_file_url')" type="file" v-model="baTable.form.items!.recording_file_url" prop="recording_file_url" />-->
-<!--          <FormItem :label="t('broadcasting.propaganda.recording.duration')" type="time" v-model="baTable.form.items!.duration" prop="duration" :placeholder="t('Please select field', { field: t('broadcasting.propaganda.recording.duration') })" />-->
-          <FormItem :label="t('broadcasting.propaganda.recording.remark')" type="textarea" v-model="baTable.form.items!.remark" prop="remark" :input-attr="{ rows: 3 }" @keyup.enter.stop="" @keyup.ctrl.enter="baTable.onSubmit(formRef)" :placeholder="t('Please input field', { field: t('broadcasting.propaganda.recording.remark') })" />
+          <FormItem :label="t('broadcast.propaganda.recording.recording_file_name')" type="string" v-model="baTable.form.items!.recording_file_name" prop="recording_file_name" :placeholder="t('Please input field', { field: t('broadcast.propaganda.recording.recording_file_name') })" />
+<!--          <FormItem :label="t('broadcast.propaganda.recording.recording_file_url')" type="file" v-model="baTable.form.items!.recording_file_url" prop="recording_file_url" />-->
+<!--          <FormItem :label="t('broadcast.propaganda.recording.duration')" type="time" v-model="baTable.form.items!.duration" prop="duration" :placeholder="t('Please select field', { field: t('broadcast.propaganda.recording.duration') })" />-->
+          <FormItem :label="t('broadcast.propaganda.recording.remark')" type="textarea" v-model="baTable.form.items!.remark" prop="remark" :input-attr="{ rows: 3 }" @keyup.enter.stop="" @keyup.ctrl.enter="baTable.onSubmit(formRef)" :placeholder="t('Please input field', { field: t('broadcast.propaganda.recording.remark') })" />
         </el-form>
       </div>
     </el-scrollbar>
@@ -62,8 +62,8 @@ const baTable = inject('baTable') as baTableClass
 const { t } = useI18n()
 
 const rules: Partial<Record<string, FormItemRule[]>> = reactive({
-    update_time: [buildValidatorData({ name: 'date', title: t('broadcasting.propaganda.recording.update_time') })],
-    create_time: [buildValidatorData({ name: 'date', title: t('broadcasting.propaganda.recording.create_time') })],
+    update_time: [buildValidatorData({ name: 'date', title: t('broadcast.propaganda.recording.update_time') })],
+    create_time: [buildValidatorData({ name: 'date', title: t('broadcast.propaganda.recording.create_time') })],
 })
 
 // 实现父组件向子组件传值

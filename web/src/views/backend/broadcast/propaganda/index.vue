@@ -5,7 +5,7 @@
             <el-col :span="12" :body-style="{ padding: '0px' }">
                 <el-card shadow="hover">
                     <div class="card-button">
-                      <router-link to="/admin/broadcasting/propaganda/live">
+                      <router-link to="/admin/broadcast/propaganda/live">
                         <el-button type="primary" size="large" circle>
                           <Icon name="el-icon-VideoCamera" color="white" size="25" />
                         </el-button>
@@ -23,7 +23,7 @@
             <el-col :span="12" :body-style="{ padding: '0px' }">
                 <el-card shadow="hover">
                     <div class="card-button">
-                      <router-link to="/admin/broadcasting/propaganda/recording">
+                      <router-link to="/admin/broadcast/propaganda/recording">
                         <el-button type="danger" size="large" circle>
                           <Icon name="el-icon-Microphone" color="white" size="25" />
                         </el-button>
@@ -46,7 +46,7 @@
                         <!-- 自定义按钮请使用插槽，甚至公共搜索也可以使用具名插槽渲染，参见文档 -->
                         <TableHeader
                             :buttons="['comSearch', 'quickSearch', 'columnDisplay']"
-                            :quick-search-placeholder="t('Quick search placeholder', { fields: t('broadcasting.propaganda.quick Search Fields') })"
+                            :quick-search-placeholder="t('Quick search placeholder', { fields: t('broadcast.propaganda.quick Search Fields') })"
                         >
                             <el-col :span="5">
                                 <el-button type="success" :icon="ArrowRightBold" round @click="playAudioBroadcast()" :disabled="!enableBatchOpt">播放音频广播</el-button>
@@ -98,7 +98,7 @@ import PopupForm from './popupForm.vue'
 import Table from '/@/components/table/index.vue'
 import TableHeader from '/@/components/table/header/index.vue'
 import {loadJs} from '/@/utils/common'
-import AudioPlayer from '/src/views/backend/broadcasting/propaganda/audioPlayer.vue'
+import AudioPlayer from '/src/views/backend/broadcast/propaganda/audioPlayer.vue'
 import { TableColumnCtx } from "element-plus";
 import { Howl } from 'howler';
 import Icon from "/@/components/icon/index.vue"; // 引入 Howl 对象
@@ -106,7 +106,7 @@ import Icon from "/@/components/icon/index.vue"; // 引入 Howl 对象
 loadJs('https://unpkg.com/axios/dist/axios.min.js')
 
 defineOptions({
-    name: 'broadcasting/propaganda',
+    name: 'broadcast/propaganda',
 })
 
 const {t} = useI18n()
@@ -160,16 +160,16 @@ function playAudioBroadcast() {
  * baTable 内包含了表格的所有数据且数据具备响应性，然后通过 provide 注入给了后代组件
  */
 const baTable = new baTableClass(
-    new baTableApi('/admin/broadcasting.Propaganda/'),
+    new baTableApi('/admin/broadcast.Propaganda/'),
     {
         pk: 'voice_file_id',
         column: [
             { type: 'selection', align: 'center', operator: false },
             { type: 'index', align: 'center', operator: false },
-            // {label: t('broadcasting.propaganda.voice_file_id'), prop: 'voice_file_id', align: 'center', width: 100, operator: 'RANGE', sortable: 'custom'},
-            {label: t('broadcasting.propaganda.voice_file_url'), prop: 'voice_file_url', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false},
+            // {label: t('broadcast.propaganda.voice_file_id'), prop: 'voice_file_id', align: 'center', width: 100, operator: 'RANGE', sortable: 'custom'},
+            {label: t('broadcast.propaganda.voice_file_url'), prop: 'voice_file_url', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false},
             {
-                label: t('broadcasting.propaganda.voice_file_name'),
+                label: t('broadcast.propaganda.voice_file_name'),
                 prop: 'voice_file_name',
                 align: 'center',
                 operatorPlaceholder: t('Fuzzy query'),
@@ -177,7 +177,7 @@ const baTable = new baTableClass(
                 sortable: false
             },
             {
-                label: t('broadcasting.propaganda.remark'),
+                label: t('broadcast.propaganda.remark'),
                 prop: 'remark',
                 align: 'center',
                 operatorPlaceholder: t('Fuzzy query'),
@@ -185,7 +185,7 @@ const baTable = new baTableClass(
                 sortable: false
             },
             {
-                label: t('broadcasting.propaganda.duration'),
+                label: t('broadcast.propaganda.duration'),
                 prop: 'duration',
                 align: 'center',
                 operator: 'eq',
@@ -201,8 +201,8 @@ const baTable = new baTableClass(
                     return row.duration;
                 }
             },
-            // {label: t('broadcasting.propaganda.update_time'), prop: 'update_time', align: 'center', render: 'datetime', operator: 'RANGE', sortable: 'custom', width: 160, timeFormat: 'yyyy-mm-dd hh:MM:ss'},
-            // {label: t('broadcasting.propaganda.create_time'), prop: 'create_time', align: 'center', render: 'datetime', operator: 'RANGE', sortable: 'custom', width: 160, timeFormat: 'yyyy-mm-dd hh:MM:ss'},
+            // {label: t('broadcast.propaganda.update_time'), prop: 'update_time', align: 'center', render: 'datetime', operator: 'RANGE', sortable: 'custom', width: 160, timeFormat: 'yyyy-mm-dd hh:MM:ss'},
+            // {label: t('broadcast.propaganda.create_time'), prop: 'create_time', align: 'center', render: 'datetime', operator: 'RANGE', sortable: 'custom', width: 160, timeFormat: 'yyyy-mm-dd hh:MM:ss'},
             // {label: t('Operate'), align: 'center', width: 100, render: 'buttons', buttons: optButtons, operator: false},
         ],
         dblClickNotEditColumn: [undefined],

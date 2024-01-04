@@ -1,6 +1,6 @@
 <?php
 
-namespace app\admin\controller\broadcasting;
+namespace app\admin\controller\broadcast;
 
 use app\common\controller\Backend;
 
@@ -12,7 +12,7 @@ class Propaganda extends Backend
     /**
      * Propaganda模型对象
      * @var object
-     * @phpstan-var \app\admin\model\broadcasting\Propaganda
+     * @phpstan-var \app\admin\model\broadcast\Propaganda
      */
     protected object $model;
 
@@ -25,7 +25,7 @@ class Propaganda extends Backend
     public function initialize(): void
     {
         parent::initialize();
-        $this->model = new \app\admin\model\broadcasting\Propaganda;
+        $this->model = new \app\admin\model\broadcast\Propaganda;
     }
 
 

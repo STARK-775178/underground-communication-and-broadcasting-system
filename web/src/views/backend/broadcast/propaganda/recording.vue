@@ -87,7 +87,7 @@
             <!-- 自定义按钮请使用插槽，甚至公共搜索也可以使用具名插槽渲染，参见文档 -->
             <TableHeader
                 :buttons="['comSearch', 'quickSearch', 'columnDisplay']"
-                :quick-search-placeholder="t('Quick search placeholder', { fields: t('broadcasting.propaganda.quick Search Fields') })"
+                :quick-search-placeholder="t('Quick search placeholder', { fields: t('broadcast.propaganda.quick Search Fields') })"
             >
               <el-col :span="5">
                 <el-button type="success" :icon="ArrowRightBold" round @click="playRecordingBroadcast()" :disabled="!enableBatchOpt">播放录音广播</el-button>
@@ -137,7 +137,7 @@ import Table from '/@/components/table/index.vue'
 import TableHeader from '/@/components/table/header/index.vue'
 import { ArrowRightBold } from '@element-plus/icons-vue'
 import { loadJs } from '/src/utils/common'
-import AudioPlayer from '/src/views/backend/broadcasting/propaganda/audioPlayer.vue'
+import AudioPlayer from '/src/views/backend/broadcast/propaganda/audioPlayer.vue'
 import Icon from "/src/components/icon/index.vue"
 import { useRouter } from 'vue-router'
 import { fileUpload } from '/@/api/common'
@@ -151,7 +151,7 @@ import 'recorder-core/src/extensions/waveview'
 loadJs('https://unpkg.com/axios/dist/axios.min.js')
 
 defineOptions({
-    name: 'broadcasting/propaganda/recording',
+    name: 'broadcast/propaganda/recording',
 })
 
 const { t } = useI18n()
@@ -497,17 +497,17 @@ function returnPreviousPage() {
  * baTable 内包含了表格的所有数据且数据具备响应性，然后通过 provide 注入给了后代组件
  */
 const baTable = new baTableClass(
-    new baTableApi('/admin/broadcasting.propaganda.Recording/'),
+    new baTableApi('/admin/broadcast.propaganda.Recording/'),
     {
         pk: 'recording_file_id',
         column: [
             { type: 'selection', align: 'center', operator: false },
-            { label: t('broadcasting.propaganda.recording.recording_file_id'), prop: 'recording_file_id', align: 'center', width: 120, operator: 'RANGE', sortable: 'custom' },
-            { label: t('broadcasting.propaganda.recording.recording_file_name'), prop: 'recording_file_name', align: 'center', width: 160, operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false },
-            { label: t('broadcasting.propaganda.recording.recording_file_url'), prop: 'recording_file_url', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false },
-            { label: t('broadcasting.propaganda.recording.create_time'), prop: 'create_time', align: 'center', render: 'datetime', operator: 'RANGE', sortable: 'custom', width: 160, timeFormat: 'yyyy-mm-dd hh:MM:ss' },
+            { label: t('broadcast.propaganda.recording.recording_file_id'), prop: 'recording_file_id', align: 'center', width: 120, operator: 'RANGE', sortable: 'custom' },
+            { label: t('broadcast.propaganda.recording.recording_file_name'), prop: 'recording_file_name', align: 'center', width: 160, operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false },
+            { label: t('broadcast.propaganda.recording.recording_file_url'), prop: 'recording_file_url', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false },
+            { label: t('broadcast.propaganda.recording.create_time'), prop: 'create_time', align: 'center', render: 'datetime', operator: 'RANGE', sortable: 'custom', width: 160, timeFormat: 'yyyy-mm-dd hh:MM:ss' },
             {
-                label: t('broadcasting.propaganda.recording.duration'),
+                label: t('broadcast.propaganda.recording.duration'),
                 prop: 'duration',
                 align: 'center',
                 operator: 'eq',
@@ -515,7 +515,7 @@ const baTable = new baTableClass(
                 // render: 'tags' ,
                 width: 160,
             },
-            // { label: t('broadcasting.propaganda.recording.update_time'), prop: 'update_time', align: 'center', render: 'datetime', operator: 'RANGE', sortable: 'custom', width: 160, timeFormat: 'yyyy-mm-dd hh:MM:ss' },
+            // { label: t('broadcast.propaganda.recording.update_time'), prop: 'update_time', align: 'center', render: 'datetime', operator: 'RANGE', sortable: 'custom', width: 160, timeFormat: 'yyyy-mm-dd hh:MM:ss' },
             // { label: t('Operate'), align: 'center', width: 100, render: 'buttons', buttons: optButtons, operator: false },
         ],
         dblClickNotEditColumn: [undefined],

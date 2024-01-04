@@ -1,6 +1,6 @@
 <?php
 
-namespace app\admin\model\broadcasting;
+namespace app\admin\model\broadcast;
 
 use think\Model;
 

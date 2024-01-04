@@ -1,10 +1,10 @@
 <?php
 
-namespace app\admin\validate\broadcasting\propaganda;
+namespace app\admin\validate\broadcast;
 
 use think\Validate;
 
-class Recording extends Validate
+class Propaganda extends Validate
 {
     protected $failException = true;
 

@@ -30,10 +30,10 @@
                     :label-width="baTable.form.labelWidth + 'px'"
                     :rules="rules"
                 >
-                    <FormItem :label="t('broadcasting.propaganda.voice_file_url')" type="file" v-model="baTable.form.items!.voice_file_url" prop="voice_file_url" />
-                    <FormItem :label="t('broadcasting.propaganda.voice_file_name')" type="string" v-model="baTable.form.items!.voice_file_name" prop="voice_file_name" :placeholder="t('Please input field', { field: t('broadcasting.propaganda.voice_file_name') })" />
-                    <FormItem :label="t('broadcasting.propaganda.remark')" type="string" v-model="baTable.form.items!.remark" prop="remark" :placeholder="t('Please input field', { field: t('broadcasting.propaganda.remark') })" />
-<!--                    <FormItem :label="t('broadcasting.propaganda.duration')" type="time" v-model="baTable.form.items!.duration" prop="duration" :placeholder="t('Please select field', { field: t('broadcasting.propaganda.duration') })" />-->
+                    <FormItem :label="t('broadcast.propaganda.voice_file_url')" type="file" v-model="baTable.form.items!.voice_file_url" prop="voice_file_url" />
+                    <FormItem :label="t('broadcast.propaganda.voice_file_name')" type="string" v-model="baTable.form.items!.voice_file_name" prop="voice_file_name" :placeholder="t('Please input field', { field: t('broadcast.propaganda.voice_file_name') })" />
+                    <FormItem :label="t('broadcast.propaganda.remark')" type="string" v-model="baTable.form.items!.remark" prop="remark" :placeholder="t('Please input field', { field: t('broadcast.propaganda.remark') })" />
+<!--                    <FormItem :label="t('broadcast.propaganda.duration')" type="time" v-model="baTable.form.items!.duration" prop="duration" :placeholder="t('Please select field', { field: t('broadcast.propaganda.duration') })" />-->
                 </el-form>
             </div>
         </el-scrollbar>
@@ -62,8 +62,8 @@ const baTable = inject('baTable') as baTableClass
 const { t } = useI18n()
 
 const rules: Partial<Record<string, FormItemRule[]>> = reactive({
-    update_time: [buildValidatorData({ name: 'date', title: t('broadcasting.propaganda.update_time') })],
-    create_time: [buildValidatorData({ name: 'date', title: t('broadcasting.propaganda.create_time') })],
+    update_time: [buildValidatorData({ name: 'date', title: t('broadcast.propaganda.update_time') })],
+    create_time: [buildValidatorData({ name: 'date', title: t('broadcast.propaganda.create_time') })],
 })
 </script>
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace app\admin\controller\broadcasting\propaganda;
+namespace app\admin\controller\broadcast\propaganda;
 
 use app\common\controller\Backend;
 
@@ -12,7 +12,7 @@ class Recording extends Backend
     /**
      * File模型对象
      * @var object
-     * @phpstan-var \app\admin\model\broadcasting\propaganda\Recording
+     * @phpstan-var \app\admin\model\broadcast\propaganda\Recording
      */
     protected object $model;
 
@@ -25,7 +25,7 @@ class Recording extends Backend
     public function initialize(): void
     {
         parent::initialize();
-        $this->model = new \app\admin\model\broadcasting\propaganda\Recording;
+        $this->model = new \app\admin\model\broadcast\propaganda\Recording;
     }
 
 

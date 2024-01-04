@@ -5,17 +5,20 @@
                 <Icon :color="iconColor" class="nav-menu-icon" name="el-icon-Bell" size="20"/>
             </el-badge>
             <el-dialog v-model="dialogTableVisible" title="定时广播">
-<!--                <div style="justify-content: center; align-items: center; text-align: center" class="dialog-row">-->
-<!--                  <el-col>-->
-<!--                    <el-text class="mx-1" size="default">{{ formatDuration }}</el-text>-->
-<!--                  </el-col>-->
-<!--                </div>-->
+              <el-row>
+                <el-col>
+                    <el-countdown title="剩余播放时间" :value="remainingCallDuration"  @finish="broadcastFinish" />
+                </el-col>
+              </el-row>
+              <el-divider />
+              <el-row>
                 <el-table :data="broadcastRecordingData">
                     <el-table-column property="recording_file_url" label="文件地址" width="250px"/>
                     <el-table-column property="recording_file_name" label="文件名称"/>
                     <el-table-column property="remark" label="备注" />
                     <el-table-column property="duration" label="时长" />
                 </el-table>
+              </el-row>
               <audio-player
                   ref="audioPlayerRef"
                   class="audio-box"
@@ -148,9 +151,8 @@ import { postClearCache } from '/@/api/common'
 import TerminalVue from '/@/components/terminal/index.vue'
 
 import { ref } from 'vue'
-import AudioPlayer from "/@/views/backend/broadcasting/propaganda/audioPlayer.vue";
+import AudioPlayer from "/@/views/backend/broadcast/propaganda/audioPlayer.vue";
 import mittBus from "/@/utils/mittBus";
-import {computed} from "vue/dist/vue";
 
 const dialogTableVisible = ref(false)
 const broadcastRecordingData = ref([]); // 需要进行广播的录音数据
@@ -164,8 +166,7 @@ const recordingBroadcastIsDuring = ref(false); // 是否播放音频广播中
 const currentIndex = ref(0); // 当前音乐数据索引
 const previousMusicId = ref(""); // 上一首音乐信息
 const nextMusicId = ref(""); // 下一首音乐信息
-// const callStartTime = ref(0) // 通话时长定时器
-// const callDuration = ref(0) // 通话时长定时器
+const remainingCallDuration = ref(0); //剩余播放时间
 
 const { t } = useI18n()
 
@@ -220,8 +221,9 @@ const onClearCache = (type: string) => {
 
 mittBus.on('playBroadcastTasks', (res) => {
     // 获取需要播放的数据
-    console.log("res:" + res);
-    broadcastRecordingData.value = res;
+    broadcastRecordingData.value = res.broadcastRecordingData;
+    remainingCallDuration.value = res.duration;
+  console.log("res:" + remainingCallDuration.value);
     // 更新音频文件数据
     console.log("播放录音广播");
     musicId.value = broadcastRecordingData.value[0].recording_file_id;
@@ -233,14 +235,10 @@ mittBus.on('playBroadcastTasks', (res) => {
     dialogTableVisible.value = true
     // 更改标签的颜色
     iconColor.value = "red";
-    //todo 开启广播时间计时
-
-    //todo  获取区域连接各分机
-
     // 调用子组件的方法
     audioPlayerRef.value.playAudio();
     // 是否播放音频广播中
-    recordingBroadcastIsDuring = true;
+    recordingBroadcastIsDuring.value = true;
 })
 
 // 根据传入的musicId获取当前播放列表歌曲的上一首和下一首
@@ -281,6 +279,13 @@ function nextAudio() {
     handleBroadcastRecordingData(nextMusicId.value);
 }
 
+// 播放结束
+function broadcastFinish() {
+    console.log("播放结束")
+    // 是否播放音频广播中
+    recordingBroadcastIsDuring.value = false;
+    // TODO 广播结束逻辑
+}
 </script>
 
 <style scoped lang="scss">
@@ -388,5 +393,17 @@ function nextAudio() {
   display: flex;
   align-items: center;
   margin-bottom: 10px;
+}
+
+.el-col {
+  text-align: center;
+  width: 300px;
+}
+
+.el-row {
+  margin-bottom: 20px;
+  &:last-child {
+    margin-bottom: 0;
+  }
 }
 </style>
