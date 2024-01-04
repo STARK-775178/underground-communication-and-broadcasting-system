@@ -1,21 +1,23 @@
 <template>
-    <div class="default-main ba-table-box">
-        <el-alert class="ba-table-alert" v-if="baTable.table.remark" :title="baTable.table.remark" type="info" show-icon />
+    <div>
+        <div class="default-main ba-table-box">
+            <el-alert class="ba-table-alert" v-if="baTable.table.remark" :title="baTable.table.remark" type="info" show-icon />
 
-        <!-- 表格顶部菜单 -->
-        <!-- 自定义按钮请使用插槽，甚至公共搜索也可以使用具名插槽渲染，参见文档 -->
-        <TableHeader
-            :buttons="['refresh', 'add', 'edit', 'delete', 'comSearch', 'quickSearch', 'columnDisplay']"
-            :quick-search-placeholder="t('Quick search placeholder', { fields: t('broadcast.tasks.quick Search Fields') })"
-        ></TableHeader>
+            <!-- 表格顶部菜单 -->
+            <!-- 自定义按钮请使用插槽，甚至公共搜索也可以使用具名插槽渲染，参见文档 -->
+            <TableHeader
+                :buttons="['refresh', 'add', 'edit', 'delete', 'comSearch', 'quickSearch', 'columnDisplay']"
+                :quick-search-placeholder="t('Quick search placeholder', { fields: t('broadcast.tasks.quick Search Fields') })"
+            ></TableHeader>
 
-        <!-- 表格 -->
-        <!-- 表格列有多种自定义渲染方式，比如自定义组件、具名插槽等，参见文档 -->
-        <!-- 要使用 el-table 组件原有的属性，直接加在 Table 标签上即可 -->
-        <Table ref="tableRef"></Table>
+            <!-- 表格 -->
+            <!-- 表格列有多种自定义渲染方式，比如自定义组件、具名插槽等，参见文档 -->
+            <!-- 要使用 el-table 组件原有的属性，直接加在 Table 标签上即可 -->
+            <Table ref="tableRef"></Table>
 
-        <!-- 表单 -->
-        <PopupForm />
+            <!-- 表单 -->
+            <PopupForm />
+        </div>
     </div>
 </template>
 
@@ -46,18 +48,19 @@ const baTable = new baTableClass(
         pk: 'head_id',
         column: [
             { type: 'selection', align: 'center', operator: false },
-            { label: t('broadcast.tasks.head_id'), prop: 'head_id', align: 'center', width: 70, operator: 'RANGE', sortable: 'custom' },
+            { type: 'index', align: 'center', operator: false },
+            // { label: t('broadcast.tasks.head_id'), prop: 'head_id', align: 'center', width: 70, operator: 'RANGE', sortable: 'custom' },
             { label: t('broadcast.tasks.name'), prop: 'name', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false },
             { label: t('broadcast.tasks.execution_time'), prop: 'execution_time', align: 'center', operator: 'RANGE', sortable: false, width: 160, timeFormat: 'yyyy-mm-dd hh:MM:ss' },
             { label: t('broadcast.tasks.duration'), prop: 'duration', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false },
-            { label: t('broadcast.tasks.broadcast_area_ids'), prop: 'broadcast_area_ids', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE' },
+            // { label: t('broadcast.tasks.broadcast_area_ids'), prop: 'broadcast_area_ids', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE' },
             { label: t('broadcast.tasks.broadcastarea__area'), prop: 'broadcastArea.area', align: 'center', render: 'tags', operator: false },
             { label: t('broadcast.tasks.broadcastarea__area'), prop: 'broadcast_area_ids', align: 'center', operator: 'FIND_IN_SET', show: false, comSearchRender: 'remoteSelect', remote: { pk: 'cbroadcast_area.id', field: 'area', remoteUrl: '/admin/device.Area/index', multiple: true } },
-            { label: t('broadcast.tasks.task_status'), prop: 'task_status', align: 'center', render: 'tags', operatorPlaceholder: t('Fuzzy query'), operator: 'FIND_IN_SET', sortable: false, replaceValue: { NEW: t('broadcast.tasks.task_status NEW'), EXECUTING: t('broadcast.tasks.task_status EXECUTING'), ' FINISH': t('broadcast.tasks.task_status FINISH') } },
+            { label: t('broadcast.tasks.task_status'), prop: 'task_status', align: 'center', render: 'tags', operatorPlaceholder: t('Fuzzy query'), operator: 'FIND_IN_SET', sortable: false, replaceValue: { NEW: t('broadcast.tasks.task_status NEW'), EXECUTING: t('broadcast.tasks.task_status EXECUTING'), FINISH: t('broadcast.tasks.task_status FINISH') } },
             { label: t('broadcast.tasks.source'), prop: 'source', align: 'center', render: 'tags', operatorPlaceholder: t('Fuzzy query'), operator: 'FIND_IN_SET', sortable: false, replaceValue: { OTHER: t('broadcast.tasks.source OTHER'), THIS: t('broadcast.tasks.source THIS') } },
             { label: t('broadcast.tasks.create_time'), prop: 'create_time', align: 'center', render: 'datetime', operator: 'RANGE', sortable: 'custom', width: 160, timeFormat: 'yyyy-mm-dd hh:MM:ss' },
-            { label: t('broadcast.tasks.updated_time'), prop: 'updated_time', align: 'center', operator: 'RANGE', sortable: false, width: 160, timeFormat: 'yyyy-mm-dd hh:MM:ss' },
-            { label: t('broadcast.tasks.status'), prop: 'status', align: 'center', operator: 'RANGE', sortable: false, replaceValue: { '0': t('broadcast.tasks.status 0'), '1': t('broadcast.tasks.status 1') } },
+            // { label: t('broadcast.tasks.updated_time'), prop: 'updated_time', align: 'center', operator: 'RANGE', sortable: false, width: 160, timeFormat: 'yyyy-mm-dd hh:MM:ss' },
+            // { label: t('broadcast.tasks.status'), prop: 'status', align: 'center', operator: 'RANGE', sortable: false, replaceValue: { '0': t('broadcast.tasks.status 0'), '1': t('broadcast.tasks.status 1') } },
             { label: t('Operate'), align: 'center', width: 100, render: 'buttons', buttons: optButtons, operator: false },
         ],
         dblClickNotEditColumn: [undefined],

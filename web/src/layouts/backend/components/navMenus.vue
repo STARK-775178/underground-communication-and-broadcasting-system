@@ -1,33 +1,33 @@
 <template>
     <div class="nav-menus" :class="configStore.layout.layoutMode">
         <div @click="dialogTableVisible = true" class="nav-menu-item pt2">
-            <el-badge :is-dot="terminal.state.showDot">
-                <Icon :color="iconColor" class="nav-menu-icon" name="el-icon-Bell" size="20"/>
+            <el-badge>
+                <Icon :color="iconColor" class="nav-menu-icon" name="el-icon-Bell" size="20" />
             </el-badge>
             <el-dialog v-model="dialogTableVisible" title="定时广播">
-              <el-row>
-                <el-col>
-                    <el-countdown title="剩余播放时间" :value="remainingCallDuration"  @finish="broadcastFinish" />
-                </el-col>
-              </el-row>
-              <el-divider />
-              <el-row>
-                <el-table :data="broadcastRecordingData">
-                    <el-table-column property="recording_file_url" label="文件地址" width="250px"/>
-                    <el-table-column property="recording_file_name" label="文件名称"/>
-                    <el-table-column property="remark" label="备注" />
-                    <el-table-column property="duration" label="时长" />
-                </el-table>
-              </el-row>
-              <audio-player
-                  ref="audioPlayerRef"
-                  class="audio-box"
-                  :fileid="musicId"
-                  :fileurl="musicUrl"
-                  :filename="musicName"
-                  @previousAudio="previousAudio"
-                  @nextAudio="nextAudio"
-              ></audio-player>
+                <el-row>
+                    <el-col>
+                        <el-countdown title="剩余播放时间" :value="remainingCallDuration" @finish="broadcastFinish" />
+                    </el-col>
+                </el-row>
+                <el-divider />
+                <el-row>
+                    <el-table :data="broadcastRecordingData">
+                        <el-table-column property="recording_file_url" label="文件地址" width="250px" />
+                        <el-table-column property="recording_file_name" label="文件名称" />
+                        <el-table-column property="remark" label="备注" />
+                        <el-table-column property="duration" label="时长" />
+                    </el-table>
+                </el-row>
+                <audio-player
+                    ref="audioPlayerRef"
+                    class="audio-box"
+                    :fileid="musicId"
+                    :fileurl="musicUrl"
+                    :filename="musicName"
+                    @previousAudio="previousAudio"
+                    @nextAudio="nextAudio"
+                ></audio-player>
             </el-dialog>
         </div>
         <router-link class="h100" target="_blank" :title="t('Home')" to="/">
@@ -133,7 +133,7 @@
 </template>
 
 <script lang="ts" setup>
-import {reactive, watchEffect} from 'vue'
+import { reactive, watchEffect } from 'vue'
 import { editDefaultLang } from '/@/lang'
 import screenfull from 'screenfull'
 import { useConfig } from '/@/stores/config'
@@ -151,22 +151,25 @@ import { postClearCache } from '/@/api/common'
 import TerminalVue from '/@/components/terminal/index.vue'
 
 import { ref } from 'vue'
-import AudioPlayer from "/@/views/backend/broadcast/propaganda/audioPlayer.vue";
-import mittBus from "/@/utils/mittBus";
+import AudioPlayer from '/@/views/backend/broadcast/propaganda/audioPlayer.vue'
+import mittBus from '/@/utils/mittBus'
 
+import { updateTaskStatusToFinish } from '/@/api/backend/broadcast/broadcastTask'
+import { hangupAllTask } from '/@/api/backend/communication/call'
 const dialogTableVisible = ref(false)
-const broadcastRecordingData = ref([]); // 需要进行广播的录音数据
-const iconColor = ref("black"); //
+const broadcastRecordingData = ref([]) // 需要进行广播的录音数据
+const iconColor = ref('black') //
 
-const musicId = ref(""); // 音乐Id
-const musicName = ref(""); // 音乐名称
-const musicUrl = ref(""); // 当前播放的音乐地址
-const audioPlayerRef = ref(null);
-const recordingBroadcastIsDuring = ref(false); // 是否播放音频广播中
-const currentIndex = ref(0); // 当前音乐数据索引
-const previousMusicId = ref(""); // 上一首音乐信息
-const nextMusicId = ref(""); // 下一首音乐信息
-const remainingCallDuration = ref(0); //剩余播放时间
+const musicId = ref('') // 音乐Id
+const musicName = ref('') // 音乐名称
+const musicUrl = ref('') // 当前播放的音乐地址
+const audioPlayerRef = ref(null)
+const recordingBroadcastIsDuring = ref(false) // 是否播放音频广播中
+const currentIndex = ref(0) // 当前音乐数据索引
+const previousMusicId = ref('') // 上一首音乐信息
+const nextMusicId = ref('') // 下一首音乐信息
+const remainingCallDuration = ref(0) //剩余播放时间
+const head_id = ref(0) // 头id
 
 const { t } = useI18n()
 
@@ -221,70 +224,95 @@ const onClearCache = (type: string) => {
 
 mittBus.on('playBroadcastTasks', (res) => {
     // 获取需要播放的数据
-    broadcastRecordingData.value = res.broadcastRecordingData;
-    remainingCallDuration.value = res.duration;
-  console.log("res:" + remainingCallDuration.value);
+    broadcastRecordingData.value = res.broadcastRecordingData
+    remainingCallDuration.value = Date.now() + 1000 * Math.floor(res.duration)
+    head_id.value = res.head_id
+    console.log('res.duration:' + res.duration)
+    console.log('remainingCallDuration.value:' + remainingCallDuration.value)
     // 更新音频文件数据
-    console.log("播放录音广播");
-    musicId.value = broadcastRecordingData.value[0].recording_file_id;
-    musicUrl.value = broadcastRecordingData.value[0].recording_file_url;
-    musicName.value = broadcastRecordingData.value[0].recording_file_name;
-    handleBroadcastRecordingData(broadcastRecordingData.value[0].recording_file_id);
-    currentIndex.value = broadcastRecordingData.value[0].index;
+    console.log('播放录音广播')
+    musicId.value = broadcastRecordingData.value[0].recording_file_id
+    musicUrl.value = broadcastRecordingData.value[0].recording_file_url
+    musicName.value = broadcastRecordingData.value[0].recording_file_name
+    handleBroadcastRecordingData(broadcastRecordingData.value[0].recording_file_id)
+    currentIndex.value = broadcastRecordingData.value[0].index
     // 打开播放框
     dialogTableVisible.value = true
     // 更改标签的颜色
-    iconColor.value = "red";
-    // 调用子组件的方法
-    audioPlayerRef.value.playAudio();
+    iconColor.value = 'red'
+    // 播放音频
+    audioPlayerRef.value.playAudio()
     // 是否播放音频广播中
-    recordingBroadcastIsDuring.value = true;
+    recordingBroadcastIsDuring.value = true
 })
 
 // 根据传入的musicId获取当前播放列表歌曲的上一首和下一首
 function handleBroadcastRecordingData(currentMusicId: string) {
-    console.log("获取上一首和下一首")
+    console.log('获取上一首和下一首')
     broadcastRecordingData.value.forEach((item, index) => {
         if (item.recording_file_id === currentMusicId) {
             // 更新当前播放音乐信息
-            musicId.value = item.recording_file_id;
-            musicUrl.value = item.recording_file_url;
-            musicName.value = item.recording_file_name;
+            musicId.value = item.recording_file_id
+            musicUrl.value = item.recording_file_url
+            musicName.value = item.recording_file_name
             // 更新上一首歌
             if (index === 0) {
-                previousMusicId.value = broadcastRecordingData.value[broadcastRecordingData.value.length - 1].recording_file_id;
+                previousMusicId.value = broadcastRecordingData.value[broadcastRecordingData.value.length - 1].recording_file_id
             } else if (index > 0) {
-                previousMusicId.value = broadcastRecordingData.value[index - 1].recording_file_id;
+                previousMusicId.value = broadcastRecordingData.value[index - 1].recording_file_id
             }
             // 更新下一首歌
             if (index === broadcastRecordingData.value.length - 1) {
-                nextMusicId.value = broadcastRecordingData.value[0].recording_file_id;
+                nextMusicId.value = broadcastRecordingData.value[0].recording_file_id
             } else if (index < broadcastRecordingData.value.length - 1) {
-                nextMusicId.value = broadcastRecordingData.value[index + 1].recording_file_id;
+                nextMusicId.value = broadcastRecordingData.value[index + 1].recording_file_id
             }
         }
-        index++;
-    });
+        index++
+    })
 }
 
 //播放上一首
 function previousAudio() {
-    console.log("页面上一首")
-    handleBroadcastRecordingData(previousMusicId.value);
+    console.log('页面上一首')
+    handleBroadcastRecordingData(previousMusicId.value)
 }
 
 //播放下一首
 function nextAudio() {
-    console.log("页面下一首")
-    handleBroadcastRecordingData(nextMusicId.value);
+    console.log('页面下一首')
+    handleBroadcastRecordingData(nextMusicId.value)
 }
 
 // 播放结束
 function broadcastFinish() {
-    console.log("播放结束")
-    // 是否播放音频广播中
-    recordingBroadcastIsDuring.value = false;
-    // TODO 广播结束逻辑
+    //修改定时广播的状态为已经执行
+    updateTaskStatusToFinish(head_id.value)
+        .then((response) => {
+            // 结束通话
+            hangupAllTask()
+                .then((response) => {
+                    // 结束音频
+                    audioPlayerRef.value.playAudio()
+                    // 更改图标状态
+                    iconColor.value = 'black'
+                    // 是否播放音频广播中
+                    recordingBroadcastIsDuring.value = false
+                    // 关闭对话框
+                    dialogTableVisible.value = false
+                    // 处理响应数据
+                    console.log(response)
+                })
+                .catch((error) => {
+                    // 处理错误
+                    console.error(error)
+                })
+        })
+        .catch((error) => {
+            // 处理错误
+            console.error(error)
+        })
+    console.log('播放结束')
 }
 </script>
 
@@ -390,20 +418,20 @@ function broadcastFinish() {
 }
 
 .dialog-row {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
 }
 
 .el-col {
-  text-align: center;
-  width: 300px;
+    text-align: center;
+    width: 300px;
 }
 
 .el-row {
-  margin-bottom: 20px;
-  &:last-child {
-    margin-bottom: 0;
-  }
+    margin-bottom: 20px;
+    &:last-child {
+        margin-bottom: 0;
+    }
 }
 </style>

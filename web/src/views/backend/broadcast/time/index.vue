@@ -1,70 +1,72 @@
 <template>
-    <!-- 定时广播 -->
-    <el-container>
-        <el-main>
-            <el-row>
-                <el-col :span="24">
-                    <el-card class="header-card">
-                        <div class="clearfix">
-                            <div class="icon-card">
-                                <Icon name="el-icon-Bell" color="#909399" size="16" />
+    <div>
+        <!-- 定时广播 -->
+        <el-container>
+            <el-main>
+                <el-row>
+                    <el-col :span="24">
+                        <el-card class="header-card">
+                            <div class="clearfix">
+                                <div class="icon-card">
+                                    <Icon name="el-icon-Bell" color="#909399" size="16" />
+                                </div>
+                                <span> 定时广播 </span>
+                                <el-divider></el-divider>
                             </div>
-                            <span> 定时广播 </span>
-                            <el-divider></el-divider>
-                        </div>
-                        <div class="header-button">
-                            <el-button type="success" round @click="onAction('add')">添加定时广播</el-button>
-                        </div>
-                        <div class="header-text">
-                            <span>您可根据需求设置单个或多个按时间、日期、月份</span>
-                        </div>
-                    </el-card>
-                </el-col>
-            </el-row>
-        </el-main>
-    </el-container>
-    <!-- 我的定时广播-没有数据 -->
-    <el-container v-if="false">
-        <el-main>
-            <el-row>
-                <el-col :span="24">
-                    <el-card class="main-card-null">
-                        <div class="clearfix">
-                            <span>我的定时广播</span>
-                            <el-divider></el-divider>
-                        </div>
-                        <div class="main-text">
-                            <span>您暂无定时广播任务</span>
-                        </div>
-                    </el-card>
-                </el-col>
-            </el-row>
-        </el-main>
-    </el-container>
-    <!-- 我的定时广播-有数据 -->
-    <el-container v-else>
-        <el-main>
-            <el-row>
-                <el-col :span="24">
-                    <el-card class="main-card">
-                        <div class="clearfix">
-                            <span>
-                                <Icon class="icon-card" name="el-icon-Clock" color="#909399" size="16" />
-                                我的定时广播
-                            </span>
-                            <el-divider></el-divider>
-                        </div>
-                        <!-- 表格 -->
-                        <!-- 表格列有多种自定义渲染方式，比如自定义组件、具名插槽等，参见文档 -->
-                        <!-- 要使用 el-table 组件原有的属性，直接加在 Table 标签上即可 -->
-                        <Table ref="tableRef"></Table>
-                    </el-card>
-                </el-col>
-            </el-row>
-        </el-main>
-    </el-container>
-    <!-- 表单 -->
-    <PopupForm />
+                            <div class="header-button">
+                                <el-button type="success" round @click="onAction('add')">添加定时广播</el-button>
+                            </div>
+                            <div class="header-text">
+                                <span>您可根据需求设置单个或多个按时间、日期、月份</span>
+                            </div>
+                        </el-card>
+                    </el-col>
+                </el-row>
+            </el-main>
+        </el-container>
+        <!-- 我的定时广播-没有数据 -->
+        <el-container v-if="false">
+            <el-main>
+                <el-row>
+                    <el-col :span="24">
+                        <el-card class="main-card-null">
+                            <div class="clearfix">
+                                <span>我的定时广播</span>
+                                <el-divider></el-divider>
+                            </div>
+                            <div class="main-text">
+                                <span>您暂无定时广播任务</span>
+                            </div>
+                        </el-card>
+                    </el-col>
+                </el-row>
+            </el-main>
+        </el-container>
+        <!-- 我的定时广播-有数据 -->
+        <el-container v-else>
+            <el-main>
+                <el-row>
+                    <el-col :span="24">
+                        <el-card class="main-card">
+                            <div class="clearfix">
+                                <span>
+                                    <Icon class="icon-card" name="el-icon-Clock" color="#909399" size="16" />
+                                    我的定时广播
+                                </span>
+                                <el-divider></el-divider>
+                            </div>
+                            <!-- 表格 -->
+                            <!-- 表格列有多种自定义渲染方式，比如自定义组件、具名插槽等，参见文档 -->
+                            <!-- 要使用 el-table 组件原有的属性，直接加在 Table 标签上即可 -->
+                            <Table ref="tableRef"></Table>
+                        </el-card>
+                    </el-col>
+                </el-row>
+            </el-main>
+        </el-container>
+        <!-- 表单 -->
+        <PopupForm />
+    </div>
 </template>
 
 <script setup lang="ts">

@@ -14,6 +14,8 @@ export function hangupApi(extension: string) {
     })
 }
 
+
+
 //hangupExtensionsApi post请求，参数为数组
 export function hangupExtensionsApi(data: anyObj) {
     return createAxios({
@@ -28,5 +30,12 @@ export function hangupAllApi(data: anyObj) {
         url: '/admin/communication.Call/hangupAll',
         method: 'get',
         data: data,
+    })
+}
+
+export function hangupAllTask() {
+    return createAxios({
+        url: '/admin/communication.Call/hangupAll',
+        method: 'get',
     })
 }

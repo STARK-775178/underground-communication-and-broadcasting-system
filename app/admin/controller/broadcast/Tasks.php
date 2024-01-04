@@ -42,6 +42,29 @@ class Tasks extends Backend
     }
 
     /**
+     * 修改状态为执行中
+     * @return void
+     */
+    public function updateTaskStatusToRunning(): void
+    {
+        $head_id = $this->request->param('head_id');
+        $this->model->where('head_id',$head_id)->update(['task_status'=>'EXECUTING']);
+        $this->success(__('定时广播执行中'));
+    }
+
+    /**
+     * 修改状态为已完成
+     */
+    public function updateTaskStatusToFinished(): void
+    {
+        $head_id = $this->request->param('head_id');
+        $this->model->where('head_id',$head_id)->update(['task_status'=>'FINISH']);
+        $this->success(__('定时广播已完成'));
+    }
+
+
+
+    /**
      *
      * 接口名称：indexBroadcastTasks
      * 功能:从cbroadcast_tasks_head表中查task_status=NEW的数据
@@ -204,6 +227,14 @@ class Tasks extends Backend
                         'create_time' => time(),
                     ]);
                 }
+
+                //修改head表中的duration字段 为音频文件的总时长
+                $duration = $this->cbroadcastTasksLineModel->where('head_id',$head_id)->sum('duration');
+                //打印duration
+//                 echo $duration;
+                 //update修改head表中的duration字段
+                $this->model->where('head_id',$head_id)->update(['duration'=>$duration]);
+
                 $this->cbroadcastTasksLineModel->commit();
                 $this->model->commit();
 
