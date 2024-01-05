@@ -18,7 +18,7 @@ class ApiToken {
     public function __construct() {
         $config = require 'config/apiConfig.php';
         $this->accessTokenUrl = $config['accessTokenUrl'];
-        $this->aclientId = $config['clientId'];
+        $this->clientId = $config['clientId'];
         $this->clientSecret = $config['clientSecret'];
     }
 
