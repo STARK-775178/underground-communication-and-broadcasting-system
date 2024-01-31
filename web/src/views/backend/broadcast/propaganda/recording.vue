@@ -95,9 +95,9 @@
               <el-col :span="4">
                 <el-button type="danger" :icon="ArrowRightBold" round @click="onAction('delete')" :disabled="!enableBatchOpt">批量删除</el-button>
               </el-col>
-              <el-col :span="4">
-                <el-button type="info" :icon="ArrowRightBold" round @click="onAction('add')" >上传歌曲</el-button>
-              </el-col>
+<!--              <el-col :span="4">-->
+<!--                <el-button type="info" :icon="ArrowRightBold" round @click="onAction('add')" >上传录音</el-button>-->
+<!--              </el-col>-->
             </TableHeader>
 
             <!-- 表格 -->
@@ -106,10 +106,16 @@
             <Table ref="tableRef"></Table>
 
             <!-- 表单 -->
-              <PopupForm :url="recordingUrl" :duration="state.duration"/>
+            <PopupForm :url="recordingUrl" :duration="state.duration"/>
+            <!-- 播放音频广播 -->
+            <BroadcastPopupForm
+                ref="broadcastPopupFormRef"
+                v-model="dialogTableVisible"
+                @broadcastFinish="broadcastFinish"
+            />
           </div>
           <!-- 播放器 -->
-          <div>
+          <div v-show="audioPlayerTableVisible">
             <audio-player
                 ref="audioPlayerRef"
                 class="audio-box"
@@ -127,12 +133,12 @@
 </template>
 
 <script setup lang="ts">
-import {ref, provide, onMounted, computed, reactive, onBeforeUnmount} from 'vue'
+import {ref, provide, onMounted, computed, reactive, onBeforeUnmount, watch} from 'vue'
 import baTableClass from '/@/utils/baTable'
-import { defaultOptButtons } from '/@/components/table'
 import { baTableApi } from '/@/api/common'
 import { useI18n } from 'vue-i18n'
 import PopupForm from './recordingPopupForm.vue'
+import BroadcastPopupForm from './broadcastRecordingPopupForm.vue'
 import Table from '/@/components/table/index.vue'
 import TableHeader from '/@/components/table/header/index.vue'
 import { ArrowRightBold } from '@element-plus/icons-vue'
@@ -156,27 +162,26 @@ defineOptions({
 
 const { t } = useI18n()
 const tableRef = ref()
-const optButtons: OptButton[] = defaultOptButtons(['edit', 'delete'])
+const audioPlayerRef = ref(null);
+const broadcastPopupFormRef = ref(null);
 
 const recordingIsBegins = ref(false); // 是否开始录音
 const recordingIsDuring = ref(false); // 是否录音中
-const recordingBroadcastIsDuring = ref(false); // 是否播放音频广播中
-const audioPlayerRef = ref(null);
+const recordingUrl = ref(""); // 录音上传后的url
 
 const musicData = ref([]); // 当前页的音乐数据
-const baTableMusicData = ref([]); // 当前页的音乐数据
-const broadcastRecordingData = ref([]); // 需要进行广播的录音数据
-
 const currentIndex = ref(0); // 当前音乐数据索引
+const musicId = ref(""); // 当前播放的音乐id
 const musicUrl = ref(""); // 当前播放的音乐地址
-const musicId = ref("");
+const musicName = ref(""); // 当前播放的音乐名称
 const previousMusicId = ref(""); // 上一首音乐信息
 const nextMusicId = ref(""); // 下一首音乐信息
-const musicName = ref(""); // 音乐名称
 
 const router = useRouter(); // 路由
 
-const recordingUrl = ref(""); // 录音上传后的url
+const broadcastRecordingData = ref([]); // 需要进行广播的录音数据
+const dialogTableVisible = ref(false); //播放音频广播弹窗
+const audioPlayerTableVisible = ref(false); //播放器是否显示
 
 /** ==================录音开始=============== **/
 const LogAudioPlayer = ref()
@@ -476,20 +481,23 @@ function transTime({duration}: { duration: any }) {
     return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
 }
 
+// 录音广播
 function playRecordingBroadcast() {
-    console.log("播放录音广播")
     broadcastRecordingData.value = baTable.table.selection!;
-    musicId.value = broadcastRecordingData.value[0].recording_file_id;
-    musicUrl.value = broadcastRecordingData.value[0].recording_file_url;
-    musicName.value = broadcastRecordingData.value[0].recording_file_name;
-    handleBroadcastRecordingData(broadcastRecordingData.value[0].recording_file_id);
-    currentIndex.value = broadcastRecordingData.value[0].index;
-    recordingBroadcastIsDuring.value = true;
-    // 调用子组件的方法
-    audioPlayerRef.value.playAudio();
+    // 调用子组件方法
+    broadcastPopupFormRef.value.broadcastCallAll(broadcastRecordingData.value);
+    // 打开播放框
+    dialogTableVisible.value = true;
 }
+
+// 广播结束
+function broadcastFinish() {
+    // 关闭播放框
+    dialogTableVisible.value = false;
+}
+
+// 返回上一页
 function returnPreviousPage() {
-    console.log("返回上一页")
     router.go(-1)
 }
 
@@ -502,19 +510,27 @@ const baTable = new baTableClass(
         pk: 'recording_file_id',
         column: [
             { type: 'selection', align: 'center', operator: false },
-            { label: t('broadcast.propaganda.recording.recording_file_id'), prop: 'recording_file_id', align: 'center', width: 120, operator: 'RANGE', sortable: 'custom' },
-            { label: t('broadcast.propaganda.recording.recording_file_name'), prop: 'recording_file_name', align: 'center', width: 160, operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false },
+            { type: 'index', align: 'center', operator: false },
+            // { label: t('broadcast.propaganda.recording.recording_file_id'), prop: 'recording_file_id', align: 'center', width: 120, operator: 'RANGE', sortable: 'custom' },
+            { label: t('broadcast.propaganda.recording.recording_file_name'), prop: 'recording_file_name', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false },
             { label: t('broadcast.propaganda.recording.recording_file_url'), prop: 'recording_file_url', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false },
-            { label: t('broadcast.propaganda.recording.create_time'), prop: 'create_time', align: 'center', render: 'datetime', operator: 'RANGE', sortable: 'custom', width: 160, timeFormat: 'yyyy-mm-dd hh:MM:ss' },
             {
                 label: t('broadcast.propaganda.recording.duration'),
                 prop: 'duration',
                 align: 'center',
                 operator: 'eq',
                 sortable: 'custom',
-                // render: 'tags' ,
-                width: 160,
+                render: 'tags' ,
             },
+            {
+                label: t('broadcast.propaganda.remark'),
+                prop: 'remark',
+                align: 'center',
+                operatorPlaceholder: t('Fuzzy query'),
+                operator: 'LIKE',
+                sortable: false
+            },
+            { label: t('broadcast.propaganda.recording.create_time'), prop: 'create_time', align: 'center', render: 'datetime', operator: 'RANGE', sortable: 'custom', timeFormat: 'yyyy-mm-dd hh:MM:ss' },
             // { label: t('broadcast.propaganda.recording.update_time'), prop: 'update_time', align: 'center', render: 'datetime', operator: 'RANGE', sortable: 'custom', width: 160, timeFormat: 'yyyy-mm-dd hh:MM:ss' },
             // { label: t('Operate'), align: 'center', width: 100, render: 'buttons', buttons: optButtons, operator: false },
         ],
@@ -531,7 +547,8 @@ const baTable = new baTableClass(
             musicName.value = row.recording_file_name;
             handleMusicData(row.recording_file_id)
             currentIndex.value = row.index;
-            recordingBroadcastIsDuring.value = false;
+            // 显示播放器
+            audioPlayerTableVisible.value = true;
             // 调用子组件的方法
             audioPlayerRef.value.playAudio();
             return false;
@@ -542,7 +559,7 @@ const baTable = new baTableClass(
 // 根据传入的musicId获取当前播放列表歌曲的上一首和下一首
 function handleMusicData(currentMusicId: string) {
     console.log("获取上一首和下一首")
-    baTableMusicData.value.forEach((item, index) => {
+    musicData.value.forEach((item, index) => {
         if (item.recording_file_id === currentMusicId) {
             // 更新当前播放音乐信息
             musicId.value = item.recording_file_id;
@@ -550,40 +567,15 @@ function handleMusicData(currentMusicId: string) {
             musicName.value = item.recording_file_name;
             // 更新上一首歌
             if (index === 0) {
-                previousMusicId.value = baTableMusicData.value[baTableMusicData.value.length - 1].recording_file_id;
+                previousMusicId.value = musicData.value[musicData.value.length - 1].recording_file_id;
             } else if (index > 0) {
-                previousMusicId.value = baTableMusicData.value[index - 1].recording_file_id;
+                previousMusicId.value = musicData.value[index - 1].recording_file_id;
             }
             // 更新下一首歌
-            if (index === baTableMusicData.value.length - 1) {
-                nextMusicId.value = baTableMusicData.value[0].recording_file_id;
-            } else if (index < baTableMusicData.value.length - 1) {
-                nextMusicId.value = baTableMusicData.value[index + 1].recording_file_id;
-            }
-        }
-        index++;
-    });
-}
-// 根据传入的musicId获取当前播放列表歌曲的上一首和下一首
-function handleBroadcastRecordingData(currentMusicId: string) {
-    console.log("获取上一首和下一首")
-    broadcastRecordingData.value.forEach((item, index) => {
-        if (item.recording_file_id === currentMusicId) {
-            // 更新当前播放音乐信息
-            musicId.value = item.recording_file_id;
-            musicUrl.value = item.recording_file_url;
-            musicName.value = item.recording_file_name;
-            // 更新上一首歌
-            if (index === 0) {
-                previousMusicId.value = broadcastRecordingData.value[broadcastRecordingData.value.length - 1].recording_file_id;
-            } else if (index > 0) {
-                previousMusicId.value = broadcastRecordingData.value[index - 1].recording_file_id;
-            }
-            // 更新下一首歌
-            if (index === broadcastRecordingData.value.length - 1) {
-                nextMusicId.value = broadcastRecordingData.value[0].recording_file_id;
-            } else if (index < broadcastRecordingData.value.length - 1) {
-                nextMusicId.value = broadcastRecordingData.value[index + 1].recording_file_id;
+            if (index === musicData.value.length - 1) {
+                nextMusicId.value = musicData.value[0].recording_file_id;
+            } else if (index < musicData.value.length - 1) {
+                nextMusicId.value = musicData.value[index + 1].recording_file_id;
             }
         }
         index++;
@@ -592,22 +584,12 @@ function handleBroadcastRecordingData(currentMusicId: string) {
 
 //播放上一首
 function previousAudio() {
-    console.log("页面上一首")
-    if (recordingBroadcastIsDuring.value === true) {
-        handleBroadcastRecordingData(previousMusicId.value);
-    }else {
-        handleMusicData(previousMusicId.value)
-    }
+    handleMusicData(previousMusicId.value)
 }
 
 //播放下一首
 function nextAudio() {
-    console.log("页面下一首")
-    if (recordingBroadcastIsDuring.value === true) {
-        handleBroadcastRecordingData(nextMusicId.value);
-    }else {
-        handleMusicData(nextMusicId.value)
-    }
+    handleMusicData(nextMusicId.value)
 }
 
 provide('baTable', baTable)
@@ -621,9 +603,16 @@ onMounted(() => {
         baTable.initSort()
         baTable.dragSort()
         //获取音频文件数据
-        baTableMusicData.value = baTable.table.data
+        musicData.value = baTable.table.data;
     })
 })
+
+watch(
+    () => baTable.table.data,
+    () => {
+        musicData.value = baTable.table.data;
+    }
+)
 
 </script>
 

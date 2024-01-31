@@ -49,12 +49,13 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, inject } from 'vue'
+import { reactive, ref, inject, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type baTableClass from '/@/utils/baTable'
 import FormItem from '/@/components/formItem/index.vue'
 import type { FormInstance, FormItemRule } from 'element-plus'
 import { buildValidatorData } from '/@/utils/validate'
+import { Howl } from 'howler'; // 引入 Howl 对象
 
 const formRef = ref<FormInstance>()
 const baTable = inject('baTable') as baTableClass
@@ -65,6 +66,34 @@ const rules: Partial<Record<string, FormItemRule[]>> = reactive({
     update_time: [buildValidatorData({ name: 'date', title: t('broadcast.propaganda.update_time') })],
     create_time: [buildValidatorData({ name: 'date', title: t('broadcast.propaganda.create_time') })],
 })
+
+const musicDataUrl = ref(""); // 播放音乐时间获取用的url
+
+// 音频播放时间换算
+function transTime({duration}: { duration: any }) {
+    const seconds = Math.floor(duration % 60);
+    const minutes = Math.floor(duration / 60);
+    const hours = Math.floor(duration / 60 / 60);
+    const formattedSeconds = String(seconds).padStart(2, "0");
+    const formattedMinutes = String(minutes).padStart(2, "0"); //padStart(2,"0") 使用0填充使字符串长度达到2
+    const formattedHours = String(hours).padStart(2, "0");
+    return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
+}
+
+watch(
+    () => baTable.form.items!.voice_file_url,
+    () => {
+        musicDataUrl.value = baTable.form.items!.voice_file_url
+        // 使用 howler.js 加载音频文件并获取时长
+        const sound = new Howl({
+            src: [musicDataUrl.value],
+            onload: function() {
+              baTable.form.items!.duration = transTime({duration: sound.duration()}); // 换算成时间格式
+            }
+        });
+    }
+)
+
 </script>
 
 <style scoped lang="scss"></style>

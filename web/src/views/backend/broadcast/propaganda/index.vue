@@ -51,9 +51,6 @@
                             <el-col :span="5">
                                 <el-button type="success" :icon="ArrowRightBold" round @click="playAudioBroadcast()" :disabled="!enableBatchOpt">播放音频广播</el-button>
                             </el-col>
-<!--                            <el-col :span="3">-->
-<!--                                <el-button type="info" :icon="ArrowRightBold" round>批量操作</el-button>-->
-<!--                            </el-col>-->
                             <el-col :span="4">
                                 <el-button type="danger" :icon="ArrowRightBold" round @click="onAction('delete')" :disabled="!enableBatchOpt">批量删除</el-button>
                             </el-col>
@@ -69,9 +66,16 @@
 
                         <!-- 表单 -->
                         <PopupForm/>
+                        <!-- 播放音频广播 -->
+                        <BroadcastPopupForm
+                                ref="broadcastPopupFormRef"
+                                v-model="dialogTableVisible"
+                                @broadcastFinish="broadcastFinish"
+                                @openDialogTableVisible="openDialogTableVisible"
+                        />
                     </div>
                     <!-- 播放器 -->
-                    <div>
+                    <div v-show="audioPlayerTableVisible">
                       <audio-player
                           ref="audioPlayerRef"
                           class="audio-box"
@@ -90,18 +94,18 @@
 
 <script setup lang="ts">
 import { ArrowRightBold} from '@element-plus/icons-vue'
-import {ref, provide, onMounted, computed} from 'vue'
+import {ref, provide, onMounted, computed, watch} from 'vue'
 import baTableClass from '/@/utils/baTable'
 import {baTableApi} from '/@/api/common'
 import {useI18n} from 'vue-i18n'
 import PopupForm from './popupForm.vue'
+import BroadcastPopupForm from './broadcastVoicePopupForm.vue'
 import Table from '/@/components/table/index.vue'
 import TableHeader from '/@/components/table/header/index.vue'
 import {loadJs} from '/@/utils/common'
 import AudioPlayer from '/src/views/backend/broadcast/propaganda/audioPlayer.vue'
-import { TableColumnCtx } from "element-plus";
-import { Howl } from 'howler';
-import Icon from "/@/components/icon/index.vue"; // 引入 Howl 对象
+import Icon from "/@/components/icon/index.vue";
+import { ElLoading } from 'element-plus'
 
 loadJs('https://unpkg.com/axios/dist/axios.min.js')
 
@@ -112,19 +116,19 @@ defineOptions({
 const {t} = useI18n()
 const tableRef = ref()
 const audioPlayerRef = ref(null);
+const broadcastPopupFormRef = ref(null);
 
-const recordingBroadcastIsDuring = ref(false); // 是否播放音频广播中
 const musicData = ref([]); // 当前页的音乐数据
-const baTableMusicData = ref([]); // 当前页的音乐数据
-const broadcastRecordingData = ref([]); // 需要进行广播的录音数据
-
 const currentIndex = ref(0); // 当前音乐数据索引
+const musicId = ref(""); // 当前播放的音乐id
 const musicUrl = ref(""); // 当前播放的音乐地址
-const musicDataUrl = ref(""); // 播放音乐时间获取用的url
-const musicId = ref("");
+const musicName = ref(""); // 当前播放的音乐名称
 const previousMusicId = ref(""); // 上一首音乐信息
 const nextMusicId = ref(""); // 下一首音乐信息
-const musicName = ref(""); // 音乐名称
+
+const broadcastRecordingData = ref([]); // 需要进行广播的录音数据
+const dialogTableVisible = ref(false); //播放音频广播弹窗
+const audioPlayerTableVisible = ref(false); //播放器是否显示
 
 const onAction = (event: string, data: anyObj = {}) => {
     baTable.onTableHeaderAction(event, data)
@@ -133,27 +137,27 @@ const onAction = (event: string, data: anyObj = {}) => {
 
 const enableBatchOpt = computed(() => (baTable.table.selection!.length > 0 ? true : false));
 
-// 音频播放时间换算
-function transTime(duration) {
-    const minutes = Math.floor(duration / 60);
-    const seconds = Math.floor(duration % 60);
-    const formattedMinutes = String(minutes).padStart(2, "0"); //padStart(2,"0") 使用0填充使字符串长度达到2
-    const formattedSeconds = String(seconds).padStart(2, "0");
-    return `${formattedMinutes}:${formattedSeconds}`;
-}
-
 // 播放音频广播
 function playAudioBroadcast() {
-    console.log("播放录音广播")
+    // 获取选中的数据
     broadcastRecordingData.value = baTable.table.selection!;
-    musicId.value = broadcastRecordingData.value[0].voice_file_id;
-    musicUrl.value = broadcastRecordingData.value[0].voice_file_url;
-    musicName.value = broadcastRecordingData.value[0].voice_file_name;
-    handleBroadcastRecordingData(broadcastRecordingData.value[0].voice_file_id);
-    currentIndex.value = broadcastRecordingData.value[0].index;
-    recordingBroadcastIsDuring.value = true;
-    // 调用子组件的方法
-    audioPlayerRef.value.playAudio();
+    // 调用子组件方法
+    broadcastPopupFormRef.value.broadcastCallAll(broadcastRecordingData.value);
+    // 打开播放框
+    dialogTableVisible.value = true;
+
+}
+
+// 打开播放框
+function openDialogTableVisible() {
+    // dialogTableVisible.value = true;
+    // console.log("dakai: " + dialogTableVisible.value);
+}
+
+// 广播结束操作
+function broadcastFinish() {
+    // 关闭播放框
+    dialogTableVisible.value = false;
 }
 
 /**
@@ -167,7 +171,6 @@ const baTable = new baTableClass(
             { type: 'selection', align: 'center', operator: false },
             { type: 'index', align: 'center', operator: false },
             // {label: t('broadcast.propaganda.voice_file_id'), prop: 'voice_file_id', align: 'center', width: 100, operator: 'RANGE', sortable: 'custom'},
-            {label: t('broadcast.propaganda.voice_file_url'), prop: 'voice_file_url', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false},
             {
                 label: t('broadcast.propaganda.voice_file_name'),
                 prop: 'voice_file_name',
@@ -176,14 +179,7 @@ const baTable = new baTableClass(
                 operator: 'LIKE',
                 sortable: false
             },
-            {
-                label: t('broadcast.propaganda.remark'),
-                prop: 'remark',
-                align: 'center',
-                operatorPlaceholder: t('Fuzzy query'),
-                operator: 'LIKE',
-                sortable: false
-            },
+            {label: t('broadcast.propaganda.voice_file_url'), prop: 'voice_file_url', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false},
             {
                 label: t('broadcast.propaganda.duration'),
                 prop: 'duration',
@@ -191,15 +187,14 @@ const baTable = new baTableClass(
                 operator: 'eq',
                 sortable: 'custom',
                 render: 'tags' ,
-                renderFormatter: (row: TableRow, field: TableColumn, value: any, column: TableColumnCtx<TableRow>, index: number) => {
-                    musicDataUrl.value = row.voice_file_url
-                    // 使用 howler.js 加载音频文件并获取时长
-                    const sound = new Howl({ src: [musicDataUrl.value] });
-                    sound.on('load', function() {
-                        row.duration = transTime(sound.duration()); // 换算成时间格式
-                    });
-                    return row.duration;
-                }
+            },
+            {
+                label: t('broadcast.propaganda.remark'),
+                prop: 'remark',
+                align: 'center',
+                operatorPlaceholder: t('Fuzzy query'),
+                operator: 'LIKE',
+                sortable: false
             },
             // {label: t('broadcast.propaganda.update_time'), prop: 'update_time', align: 'center', render: 'datetime', operator: 'RANGE', sortable: 'custom', width: 160, timeFormat: 'yyyy-mm-dd hh:MM:ss'},
             // {label: t('broadcast.propaganda.create_time'), prop: 'create_time', align: 'center', render: 'datetime', operator: 'RANGE', sortable: 'custom', width: 160, timeFormat: 'yyyy-mm-dd hh:MM:ss'},
@@ -217,8 +212,9 @@ const baTable = new baTableClass(
             musicUrl.value = row.voice_file_url;
             musicName.value = row.voice_file_name;
             handleMusicData(row.voice_file_id)
-            recordingBroadcastIsDuring.value = false;
             currentIndex.value = row.index;
+            // 显示播放器
+            audioPlayerTableVisible.value = true;
             // 调用子组件的方法
             audioPlayerRef.value.playAudio();
             return false;
@@ -251,49 +247,14 @@ function handleMusicData(currentMusicId: string) {
     });
 }
 
-function handleBroadcastRecordingData(currentMusicId: string) {
-    console.log("获取上一首和下一首")
-    broadcastRecordingData.value.forEach((item, index) => {
-        if (item.voice_file_id === currentMusicId) {
-            // 更新当前播放音乐信息
-            musicId.value = item.voice_file_id;
-            musicUrl.value = item.voice_file_url;
-            musicName.value = item.voice_file_name;
-            // 更新上一首歌
-            if (index === 0) {
-                previousMusicId.value = broadcastRecordingData.value[broadcastRecordingData.value.length - 1].voice_file_id;
-            } else if (index > 0) {
-                previousMusicId.value = broadcastRecordingData.value[index - 1].voice_file_id;
-            }
-            // 更新下一首歌
-            if (index === broadcastRecordingData.value.length - 1) {
-                nextMusicId.value = broadcastRecordingData.value[0].voice_file_id;
-            } else if (index < broadcastRecordingData.value.length - 1) {
-                nextMusicId.value = broadcastRecordingData.value[index + 1].voice_file_id;
-            }
-        }
-        index++;
-    });
-}
-
 //播放上一首
 function previousAudio() {
-    console.log("页面上一首")
-    if (recordingBroadcastIsDuring.value === true) {
-        handleBroadcastRecordingData(previousMusicId.value);
-    }else {
-        handleMusicData(previousMusicId.value)
-    }
+    handleMusicData(previousMusicId.value)
 }
 
 //播放下一首
 function nextAudio() {
-    console.log("页面下一首")
-    if (recordingBroadcastIsDuring.value === true) {
-        handleBroadcastRecordingData(nextMusicId.value);
-    }else {
-        handleMusicData(nextMusicId.value)
-    }
+    handleMusicData(nextMusicId.value)
 }
 
 provide('baTable', baTable)
@@ -304,9 +265,16 @@ onMounted(() => {
     baTable.getIndex()?.then(() => {
         baTable.initSort()
         baTable.dragSort()
-        musicData.value = baTable.table.data
+        musicData.value = baTable.table.data;
     })
 })
+
+watch(
+    () => baTable.table.data,
+    () => {
+        musicData.value = baTable.table.data;
+    }
+)
 </script>
 
 <style scoped lang="scss">

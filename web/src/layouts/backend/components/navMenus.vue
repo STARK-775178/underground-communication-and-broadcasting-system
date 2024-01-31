@@ -35,7 +35,7 @@
                 <Icon :color="configStore.getColorVal('headerBarTabColor')" class="nav-menu-icon" name="el-icon-Monitor" size="18" />
             </div>
         </router-link>
-        <el-dropdown
+        <!-- <el-dropdown
             @visible-change="onCurrentNavMenu($event, 'lang')"
             class="h100"
             size="large"
@@ -54,7 +54,7 @@
                     </el-dropdown-item>
                 </el-dropdown-menu>
             </template>
-        </el-dropdown>
+        </el-dropdown> -->
         <div @click="onFullScreen" class="nav-menu-item" :class="state.isFullScreen ? 'hover' : ''">
             <Icon
                 :color="configStore.getColorVal('headerBarTabColor')"
@@ -119,7 +119,7 @@
                     </div>
                 </div>
                 <div class="admin-info-footer">
-                    <el-button @click="onAdminInfo" type="primary" plain>{{ t('layouts.personal data') }}</el-button>
+                    <!-- <el-button @click="onAdminInfo" type="primary" plain>{{ t('layouts.personal data') }}</el-button> -->
                     <el-button @click="onLogout" type="danger" plain>{{ t('layouts.cancellation') }}</el-button>
                 </div>
             </div>

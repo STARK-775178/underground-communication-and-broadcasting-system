@@ -47,7 +47,8 @@ const baTable = new baTableClass(
         pk: 'id',
         column: [
             { type: 'selection', align: 'center', operator: false },
-            { label: t('device.id'), prop: 'id', align: 'center', width: 70, operator: 'RANGE', sortable: 'custom' },
+            { type: 'index', align: 'center', operator: false },
+            // { label: t('device.id'), prop: 'id', align: 'center', width: 70, operator: 'RANGE', sortable: 'custom' },
             {
                 label: t('device.device_type'),
                 prop: 'device_type',

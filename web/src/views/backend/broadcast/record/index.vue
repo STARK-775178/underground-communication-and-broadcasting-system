@@ -46,7 +46,8 @@ const baTable = new baTableClass(
         pk: 'id',
         column: [
             { type: 'selection', align: 'center', operator: false },
-            { label: t('broadcast.record.id'), prop: 'id', align: 'center', width: 70, operator: 'RANGE', sortable: 'custom' },
+            { type: 'index', align: 'center', operator: false },
+            // { label: t('broadcast.record.id'), prop: 'id', align: 'center', width: 70, operator: 'RANGE', sortable: 'custom' },
             { label: t('broadcast.record.broadcast_type'), prop: 'broadcast_type', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false },
             { label: t('broadcast.record.caller'), prop: 'caller', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false },
             { label: t('broadcast.record.broadcast_duration'), prop: 'broadcast_duration', align: 'center', operatorPlaceholder: t('Fuzzy query'), operator: 'LIKE', sortable: false },

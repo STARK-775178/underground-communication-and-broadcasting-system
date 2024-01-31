@@ -1,4 +1,5 @@
 <template>
+  <!-- 播放器 -->
   <div style="width: auto">
     <audio @timeupdate="updateProgress" ref="audioRef" :src="fileurl" autoplay controls style="display: none"></audio>
     <el-slider class="slider_box" v-model="currentProgress" :show-tooltip="false" @change="handleProgressChange" />
@@ -70,6 +71,7 @@ const currentProgress = ref(0);
 
 defineExpose({
     playAudio,
+    pauseAudio,
 });
 
 const emits = defineEmits(['previousAudio', 'nextAudio']);
@@ -125,7 +127,6 @@ function playAudio() {
 
 //播放上一首
 function previousAudio() {
-    console.log("上一首")
     emits("previousAudio")
     calculateDuration(props.fileurl);
     playAudio()
@@ -133,7 +134,6 @@ function previousAudio() {
 
 //播放下一首
 function nextAudio() {
-    console.log("下一首")
     emits("nextAudio")
     calculateDuration(props.fileurl);
     playAudio()
@@ -148,7 +148,6 @@ function updateProgress(e) {
     }
     // 如果播放完成 自动播放下一首
     if ( e.target.currentTime === e.target.duration) {
-        console.log("当前歌曲已播放完毕")
         nextAudio();
     }
 }
@@ -164,6 +163,13 @@ const handleProgressChange = (val) => {
     audioRef.value.play();
     audioIsPlay.value = false;
 };
+
+// 暂停播放并初始化播放器
+function pauseAudio() {
+    audioRef.value.currentTime = 0;
+    audioRef.value.pause();
+    audioIsPlay.value = true;
+}
 
 //调整音量
 const handleAudioVolume = (val) => {
